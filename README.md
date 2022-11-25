@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/570550727.svg)](https://zenodo.org/badge/latestdoi/570550727)
+
 # Sparse-Recurrent DFC
 
 This codebase contains the implementation of sparse-recurrent DFC, as well as support for continual learning on split-MNIST in both the domain-IL and class-IL learning paradigms. Moreover, this repository also contains code adapted from this [continual learning benchmark library](https://github.com/GT-RIPL/Continual-Learning-Benchmark) to compare CL performance of DFC variants against Elastic Weight Consolidation and Synaptic Intelligence. Please note that both the underlying DFC repository and the continual learning benchmark repository have been modified independently of their original authors.
