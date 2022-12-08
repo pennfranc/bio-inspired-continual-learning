@@ -79,6 +79,12 @@ def preprocess_performance_data(results, results_bp, results_ewc, results_si, re
     mask = (results['use_recurrent_weights']) & (results['layer_max_sparsities'] != no_sparsity)
     results.loc[mask, 'mode'] = 'dfc-sparse-rec'
 
+    if 'permanent_sparsification' in results.columns:
+        mask = results['permanent_sparsification']
+    else:
+        mask = (results['size_hidden'] == "20,4")
+    results.loc[mask, 'mode'] = 'permanent-sparsification'
+
 
 
     # BP
@@ -176,7 +182,7 @@ def plot_sparsity_mix(ax, lrs, set_ylabel=False, title='', cl_mode='domain', fra
 
     ax.legend(title='Learning rate')
     if set_ylabel:
-        ax.set_ylabel('accuracy')
+        ax.set_ylabel('Accuracy')
     ax.set_xlabel('fraction of activity obtained from feedback')
     ax.set_title(title)
     ax.set_xticks([0, 0.5, 1], [0, 0.5, 1])
@@ -198,7 +204,7 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
     if EVAL_METHOD == 'LR':
         not_groupby_cols.append('stop_early_at_accu')
 
-    metric_type = "train"
+    metric_type = "test"
     groupby_cols = [x for x in interesting_cols if x not in not_groupby_cols]
 
     plotted_curves = []
@@ -225,7 +231,6 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
         grouped = selected_results.groupby(by=group_by_cols_curr)
         means = grouped.mean().reset_index()
 
-
         stds = grouped.std().reset_index()
         ax.errorbar(means[x_axis_value], means[f'task_{metric_type}_accu_last'],
                      yerr=stds[f'task_{metric_type}_accu_last'], label=capitalize_label(mode), fmt=line_fmt, markersize=markersize, capsize=capsize,
@@ -236,19 +241,19 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
     if display_legend:
         ax.legend(prop={'size': fontsize}, loc=legend_loc)
 
-    ax.set_ylabel(f'Accuracy ({CL_MODE}-IL)', fontsize=fontsize)
+    ax.set_ylabel(f'Accuracy ({CL_MODE.capitalize()}-IL)', fontsize=fontsize)
     ax.set_title(title)
 
     if x_axis_value == 'lr':
         plt.xscale('log')
-        plt.xlabel('Learning rate (4 epochs)', fontsize=fontsize)
+        plt.xlabel('Learning Rate (4 Epochs)', fontsize=fontsize)
 
         if CL_MODE == 'class' and EVAL_METHOD == 'LR':
             ax.set_xlim(1 / 10**(5.6),1 / 10**(0.9))
         elif CL_MODE == 'domain' and EVAL_METHOD == 'LR':
             ax.set_xlim(1 / 10**(5.1),1 / 10**(0.9))
     else:
-        ax.set_xlabel('Early stop accuracy', fontsize=fontsize)
+        ax.set_xlabel('Early Stop Accuracy', fontsize=fontsize)
         
     if yticks is not None:
         ax.set_yticks(yticks, yticks)
@@ -296,7 +301,7 @@ def plot_peak_aligned_lr_sweep(ax, plotted_curves, CL_MODE, title='',
     ax.set_title(title)
     ax.set_xticks(range(min_length),  # ensure int x axis
                   range(min_length))
-    ax.set_ylabel(f'Accuracy ({CL_MODE}-IL)', fontsize=fontsize)
+    ax.set_ylabel(f'Accuracy ({CL_MODE.capitalize()}-IL)', fontsize=fontsize)
     ax.legend(prop={'size': fontsize})
 
 def load_performance_data(CL_MODE, MODELS, EVAL_METHOD):
@@ -417,7 +422,7 @@ def plot_hyperplane_results(names, distance_means, distance_stds, red_mode='dfc-
     plt.legend(prop={'size': fontsize})
     plt.gcf().patch.set_facecolor('white')
     plt.xscale('log')
-    plt.xlabel('Learning rate (4 epochs)', fontsize=fontsize)
+    plt.xlabel('Learning Rate (4 Epochs)', fontsize=fontsize)
     plt.ylabel(ylabel, fontsize=fontsize)
     plt.xticks(fontsize=fontsize)
     plt.yticks(fontsize=fontsize)
