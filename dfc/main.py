@@ -67,12 +67,12 @@ def run(network_type='BP'):
     ### Simple struct, that is used to share data among functions.
     shared = Namespace()
     if config.dataset in ['mnist', 'fashion_mnist', 'cifar10', 'split_mnist',
-                          'permuted_mnist', 'split_cifar']:
+                          'permuted_mnist', 'split_cifar', 'split_fashion_mnist']:
         shared.classification = True
     elif config.dataset in ['mnist_autoencoder', 'student_teacher']:
         shared.classification = False
     
-    if config.dataset in ['split_mnist', 'permuted_mnist', 'split_cifar']:
+    if config.dataset in ['split_mnist', 'permuted_mnist', 'split_cifar', 'split_fashion_mnist']:
         shared.continual_learning = True
         config.no_val_set = True
     else:

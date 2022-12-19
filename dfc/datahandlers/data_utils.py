@@ -35,6 +35,7 @@ import copy
 
 from hypnettorch.data.mnist_data import MNISTData
 from hypnettorch.data.special.split_mnist import get_split_mnist_handlers
+from hypnettorch.data.special.split_fashion_mnist import get_split_fashion_mnist_handlers
 from hypnettorch.data.special.split_cifar import SplitCIFAR100Data
 from hypnettorch.data.special.permuted_mnist import PermutedMNISTList
 
@@ -43,6 +44,7 @@ from datahandlers.dataset import DatasetWrapper, HypnettorchDatasetWrapper
 MNISTData._SUBFOLDER = ''
 MNIST_DIR = 'data/MNISTData/raw'
 CIFAR_DIR = 'data/CIFARData/'
+FASHION_MNIST_DIR = 'data/FashionMNISTData/raw'
 
 def generate_task(config, logger, device):
     """Generate the user defined task.
@@ -96,6 +98,21 @@ def generate_task(config, logger, device):
             # deepcopy of the handler is needed here because otherwise the same MNIST
             # dataset with the same permutation is shared across handlers 
             dwrapper = HypnettorchDatasetWrapper(copy.deepcopy(handler), config.batch_size, 
+                                                 in_size=in_size, out_size=out_size,
+                                                 device=device,
+                                                 double_precision=config.double_precision)
+            dwrappers.append(dwrapper)
+
+        dhandler = dwrappers
+
+    elif config.dataset == 'split_fashion_mnist':
+        dhandlers = get_split_fashion_mnist_handlers(FASHION_MNIST_DIR, use_one_hot=True, cl_mode=config.cl_mode,
+                                             num_classes_per_task=config.num_classes_per_task)
+        dwrappers = []
+        out_size = 10 if config.cl_mode == 'class' else config.num_classes_per_task
+        in_size = 784
+        for handler in dhandlers:
+            dwrapper = HypnettorchDatasetWrapper(handler, config.batch_size, 
                                                  in_size=in_size, out_size=out_size,
                                                  device=device,
                                                  double_precision=config.double_precision)

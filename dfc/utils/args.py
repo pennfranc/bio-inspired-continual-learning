@@ -241,7 +241,7 @@ def dataset_args(parser, ddataset='mnist', dtarget_class_value=1):
     dgroup.add_argument('--dataset', type=str, default=ddataset,
                         choices=['mnist', 'fashion_mnist', 'mnist_autoencoder',
                                  'cifar10', 'student_teacher', 'split_mnist',
-                                 'permuted_mnist', 'split_cifar'],
+                                 'permuted_mnist', 'split_cifar', 'split_fashion_mnist'],
                         help='Dataset to use for experiments. '
                              'Default: %(default)s.')
     dgroup.add_argument('--no_val_set', action='store_true',
@@ -944,7 +944,7 @@ def check_invalid_args_general(config, network_type):
                              'in the ]0, 1] range.')
         if config.dataset not in ['mnist', 'fashion_mnist', 'split_mnist',
                                   'mnist_autoencoder', 'student_teacher',
-                                  'permuted_mnist', 'split_cifar']:
+                                  'permuted_mnist', 'split_cifar', 'split_fashion_mnist']:
             raise NotImplementedError
 
     # Network-specific arguments.
