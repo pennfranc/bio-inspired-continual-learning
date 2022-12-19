@@ -1029,6 +1029,8 @@ def hpsearch_cli_arguments(parser, show_num_searches=True, show_out_dir=True,
                              'Default: %(default)s.')
     parser.add_argument('--random_seed', type=int, metavar='N', default=42,
                         help='Random seed. Default: %(default)s.')
+    parser.add_argument('--force_dataset', type=str, default='',
+                        help='If provided, overrides dataset specified in grid.')
 
 def run(argv=None, dout_dir='./out/hyperparam_search'):
     """Run the hyperparameter search script.
@@ -1075,6 +1077,8 @@ def run(argv=None, dout_dir='./out/hyperparam_search'):
     print('Loaded hp config from %s.' % grid_module.__file__)
     assert hasattr(grid_module, 'grid') and hasattr(grid_module, 'conditions')
     grid = grid_module.grid
+    if args.force_dataset != '':
+        grid['dataset'] = [args.force_dataset]
     conditions = grid_module.conditions
 
     grid_config_provided = len(args.grid_config) > 0
