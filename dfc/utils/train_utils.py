@@ -472,7 +472,7 @@ def test(config, logger, device, writer, shared, dloader, net, loss_fn,
 
             for i, (inputs, targets) in enumerate(data):
                 batch_size = inputs.shape[0]
-                predictions = net.forward(inputs, sparsity=True)
+                predictions = net.forward(inputs, sparsity=(not config.no_sparsity_at_inference))
 
                 ### Compute loss and accuracy.
                 test_loss += batch_size * loss_fn(predictions, targets).item()

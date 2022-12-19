@@ -538,7 +538,9 @@ def dfc_args(parser, dinit_fb_epochs=1,  dsigma_init=0, dextra_fb_epochs=0,
                              'hebbian fashion rather than comparing their somatic to their ff activity.')
     tgroup.add_argument('--from_ff_learning', action='store_true',
                         help='Whether weight updates are performed with respect to pure feedforward activations '
-                             'as opposed to activations incorporating recurrent activity.')     
+                             'as opposed to activations incorporating recurrent activity.')  
+    tgroup.add_argument('--no_sparsity_at_inference', action='store_true',
+                        help='Whether to deactivate sparsity at inference time.')    
 
     # Recurrent weights.
     tgroup.add_argument('--use_recurrent_weights', action='store_true',
