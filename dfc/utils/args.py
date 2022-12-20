@@ -142,6 +142,9 @@ def training_args(parser, network_type, depochs=2, dbatch_size=128,
                         help='Accuracy above which training is stopped early.')
     tgroup.add_argument('--shuffle_tasks', action='store_true',
                         help='Whether to randomly shuffle CL tasks.')
+    tgroup.add_argument('--permute_labels', action='store_true',
+                        help='Whether to randomly permute labels before creating tasks. '
+                             'As opposed to "shuffle_tasks", this option can change tasks.')
     
     aux = ''
     if network_type == 'DFC':

@@ -107,7 +107,7 @@ def generate_task(config, logger, device):
 
     elif config.dataset == 'split_fashion_mnist':
         dhandlers = get_split_fashion_mnist_handlers(FASHION_MNIST_DIR, use_one_hot=True, cl_mode=config.cl_mode,
-                                             num_classes_per_task=config.num_classes_per_task)
+                                             num_classes_per_task=config.num_classes_per_task, permute_labels=config.permute_labels)
         dwrappers = []
         out_size = 10 if config.cl_mode == 'class' else config.num_classes_per_task
         in_size = 784

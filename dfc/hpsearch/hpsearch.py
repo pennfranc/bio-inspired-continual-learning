@@ -1031,6 +1031,9 @@ def hpsearch_cli_arguments(parser, show_num_searches=True, show_out_dir=True,
                         help='Random seed. Default: %(default)s.')
     parser.add_argument('--force_dataset', type=str, default='',
                         help='If provided, overrides dataset specified in grid.')
+    parser.add_argument('--force_permute_labels', action='store_true',
+                        help='If provided, sets the permute_labels parameter specified ' +
+                             'in the grid to True, overriding the original config setting.')
 
 def run(argv=None, dout_dir='./out/hyperparam_search'):
     """Run the hyperparameter search script.
@@ -1079,6 +1082,8 @@ def run(argv=None, dout_dir='./out/hyperparam_search'):
     grid = grid_module.grid
     if args.force_dataset != '':
         grid['dataset'] = [args.force_dataset]
+    if args.force_permute_labels:
+        grid['permute_labels'] = [True]
     conditions = grid_module.conditions
 
     grid_config_provided = len(args.grid_config) > 0
