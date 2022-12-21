@@ -43,6 +43,7 @@ from datahandlers.dataset import DatasetWrapper, HypnettorchDatasetWrapper
 
 MNISTData._SUBFOLDER = ''
 MNIST_DIR = 'data/MNISTData/raw'
+KMNIST_DIR = 'data/KMNISTData/raw'
 CIFAR_DIR = 'data/CIFARData/'
 FASHION_MNIST_DIR = 'data/FashionMNISTData/raw'
 
@@ -65,9 +66,16 @@ def generate_task(config, logger, device):
         dhandler = generate_mnist_auto_task(config, logger, device, data_dir)
     elif config.dataset == 'student_teacher':
         dhandler = generate_student_teacher_task(config, logger, device)
-    elif config.dataset == 'split_mnist':
-        dhandlers = get_split_mnist_handlers(MNIST_DIR, use_one_hot=True, cl_mode=config.cl_mode,
-                                             num_classes_per_task=config.num_classes_per_task)
+    elif config.dataset in ['split_mnist', 'split_kmnist']:
+        if config.dataset == 'split_kmnist':
+            path = KMNIST_DIR
+            kmnist = True
+        else:
+            path = MNIST_DIR
+            kmnist = False
+        dhandlers = get_split_mnist_handlers(path, use_one_hot=True, cl_mode=config.cl_mode,
+                                             num_classes_per_task=config.num_classes_per_task, permute_labels=config.permute_labels,
+                                             custom_permutation=config.custom_label_permutation, kmnist=kmnist)
         dwrappers = []
         out_size = 10 if config.cl_mode == 'class' else config.num_classes_per_task
         in_size = 784
@@ -107,7 +115,8 @@ def generate_task(config, logger, device):
 
     elif config.dataset == 'split_fashion_mnist':
         dhandlers = get_split_fashion_mnist_handlers(FASHION_MNIST_DIR, use_one_hot=True, cl_mode=config.cl_mode,
-                                             num_classes_per_task=config.num_classes_per_task, permute_labels=config.permute_labels)
+                                             num_classes_per_task=config.num_classes_per_task, permute_labels=config.permute_labels,
+                                             custom_permutation=config.custom_label_permutation)
         dwrappers = []
         out_size = 10 if config.cl_mode == 'class' else config.num_classes_per_task
         in_size = 784

@@ -145,6 +145,8 @@ def training_args(parser, network_type, depochs=2, dbatch_size=128,
     tgroup.add_argument('--permute_labels', action='store_true',
                         help='Whether to randomly permute labels before creating tasks. '
                              'As opposed to "shuffle_tasks", this option can change tasks.')
+    tgroup.add_argument('--custom_label_permutation', type=str, default=None,
+                        help='List of 10 integers representing a custom permutation for the labels.')
     
     aux = ''
     if network_type == 'DFC':
@@ -244,7 +246,8 @@ def dataset_args(parser, ddataset='mnist', dtarget_class_value=1):
     dgroup.add_argument('--dataset', type=str, default=ddataset,
                         choices=['mnist', 'fashion_mnist', 'mnist_autoencoder',
                                  'cifar10', 'student_teacher', 'split_mnist',
-                                 'permuted_mnist', 'split_cifar', 'split_fashion_mnist'],
+                                 'permuted_mnist', 'split_cifar', 'split_fashion_mnist',
+                                 'split_kmnist'],
                         help='Dataset to use for experiments. '
                              'Default: %(default)s.')
     dgroup.add_argument('--no_val_set', action='store_true',
@@ -790,6 +793,9 @@ def post_process_args(config, network_type):
     if len(config.lr) > 1 and len(config.adam_epsilon) == 1:
         config.adam_epsilon = config.adam_epsilon*len(config.lr)
 
+    if config.custom_label_permutation:
+            config.custom_label_permutation = [int(x) for x in config.custom_label_permutation.split(',')]
+
     # DFC arguments.
     if network_type == 'DFC' or network_type == 'DFC_single_phase':
 
@@ -947,7 +953,8 @@ def check_invalid_args_general(config, network_type):
                              'in the ]0, 1] range.')
         if config.dataset not in ['mnist', 'fashion_mnist', 'split_mnist',
                                   'mnist_autoencoder', 'student_teacher',
-                                  'permuted_mnist', 'split_cifar', 'split_fashion_mnist']:
+                                  'permuted_mnist', 'split_cifar', 'split_fashion_mnist',
+                                  'split_kmnist']:
             raise NotImplementedError
 
     # Network-specific arguments.
