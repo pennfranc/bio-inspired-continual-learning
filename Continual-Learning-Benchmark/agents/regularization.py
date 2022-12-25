@@ -112,7 +112,7 @@ class EWC(L2):
         mode = self.training
         self.eval()
 
-        num_datapoints = sum(len(input) for (input, target) in dataloader.train)
+        num_datapoints = sum(1 for _ in dataloader.train)
 
         # Accumulate the square of gradients
         for i, (input, target) in enumerate(dataloader.train):
