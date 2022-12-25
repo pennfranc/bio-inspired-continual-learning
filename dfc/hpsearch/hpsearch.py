@@ -1038,7 +1038,9 @@ def hpsearch_cli_arguments(parser, show_num_searches=True, show_out_dir=True,
                         help='List of 10 integers representing a custom permutation for the labels.')
     parser.add_argument('--force_num_random_seeds', type=int, default=None,
                         help='Number of random seeds used, overriding the original config setting.')
-
+    parser.add_argument('--force_hidden_activation', type=str, default=None,
+                        help='If provided, overrides the hidden_activation arg in the config.')
+        
 def run(argv=None, dout_dir='./out/hyperparam_search'):
     """Run the hyperparameter search script.
 
@@ -1092,6 +1094,8 @@ def run(argv=None, dout_dir='./out/hyperparam_search'):
         grid['custom_label_permutation'] = [args.force_custom_label_permutation]
     if args.force_num_random_seeds:
         grid['random_seed'] = list(range(args.force_num_random_seeds))
+    if args.force_hidden_activation:
+        grid['hidden_activation'] = [args.force_hidden_activation]
     conditions = grid_module.conditions
 
     grid_config_provided = len(args.grid_config) > 0

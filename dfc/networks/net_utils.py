@@ -64,7 +64,8 @@ def generate_network(config, dataset, device, network_type='BP',
                     'optimizer':config.optimizer,
                     'print_freq': 10000000, 'gpuid': [-1],
                     'reg_coef': config.reg_coef,
-                    'stop_early_at_accu': config.stop_early_at_accu}
+                    'stop_early_at_accu': config.stop_early_at_accu, 
+                    'activation_override': config.hidden_activation}
 
     # Generate the network.
     if network_type == 'BP':
