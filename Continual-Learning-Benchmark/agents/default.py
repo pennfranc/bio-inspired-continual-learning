@@ -56,7 +56,7 @@ class NormalNN(nn.Module):
         cfg = self.config
 
         # Define the backbone (MLP, LeNet, VGG, ResNet ... etc) of model
-        model = models.__dict__[cfg['model_type']].__dict__[cfg['model_name']]()
+        model = models.__dict__[cfg['model_type']].__dict__[cfg['model_name']](activation_override=cfg['activation_override'])
 
         # Apply network surgery to the backbone
         # Create the heads for tasks (It can be single task or multi-task)
