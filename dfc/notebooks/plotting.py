@@ -222,8 +222,12 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
         elif mode.startswith('ewc'):
             group_by_cols_curr = [x for x in groupby_cols if x in results_ewc.columns]
         elif mode.startswith('si'):
+            if results_si is None: 
+                continue
             group_by_cols_curr = [x for x in groupby_cols if x in results_si.columns]
         elif mode.startswith('l2'):
+            if results_l2 is None:
+                continue
             group_by_cols_curr = [x for x in groupby_cols if x in results_l2.columns]
         else:
             group_by_cols_curr = groupby_cols
@@ -304,7 +308,7 @@ def plot_peak_aligned_lr_sweep(ax, plotted_curves, CL_MODE, title='',
     ax.set_ylabel(f'Accuracy ({CL_MODE.capitalize()}-IL)', fontsize=fontsize)
     ax.legend(prop={'size': fontsize})
 
-def load_performance_data(CL_MODE, MODELS, EVAL_METHOD):
+def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
     """
     Loads performance data for given configuration.
     """
@@ -315,47 +319,59 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD):
     results_l2 = None
 
     if CL_MODE == 'domain' and MODELS == 'CLB' and EVAL_METHOD == 'LR':
-        modes_to_plot = ['bp', 'ewc-100000', 'si-10', 'dfc-sparse-rec']
-        results = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-mnist-sparse-rec/search_results.csv', delimiter=';')
-        results_bp = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-bp/search_results.csv', delimiter=';')
-        results_ewc = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-ewc/search_results.csv', delimiter=';')
-        results_si = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-si/search_results.csv', delimiter=';')
-        results_l2 = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-l2/search_results.csv', delimiter=';')
+        modes_to_plot = ['bp', 'ewc-100', 'si-10', 'dfc-sparse-rec']
+        results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-mnist-sparse-rec/search_results.csv', delimiter=';')
+        results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-bp/search_results.csv', delimiter=';')
+        results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-ewc/search_results.csv', delimiter=';')
+        try:
+            results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-si/search_results.csv', delimiter=';')
+        except OSError as e:
+            results_si = None
+        try:
+            results_l2 = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-l2/search_results.csv', delimiter=';')
+        except OSError as e:
+            results_l2 = None
     elif CL_MODE == 'domain' and MODELS == 'DFC' and EVAL_METHOD == 'LR':
         modes_to_plot = ['dfc-standard', 'dfc-rec', 'dfc-sparse', 'dfc-sparse-rec']
-        results = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-mnist-sparse-rec-all-variants/search_results.csv', delimiter=';')
+        results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-mnist-sparse-rec-all-variants/search_results.csv', delimiter=';')
     elif CL_MODE == 'domain' and MODELS == 'CLB' and EVAL_METHOD == 'MIN_ACCU':
         modes_to_plot = ['bp', 'ewc-100000', 'si-10', 'dfc-sparse-rec']
-        results = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-mnist-sparse-rec-min-accu/search_results.csv', delimiter=';')
-        results_bp = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-bp-min-accu/search_results.csv', delimiter=';')
-        results_ewc = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-ewc-min-accu/search_results.csv', delimiter=';')
-        results_si = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-si-min-accu/search_results.csv', delimiter=';')
+        results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-mnist-sparse-rec-min-accu/search_results.csv', delimiter=';')
+        results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-bp-min-accu/search_results.csv', delimiter=';')
+        results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-ewc-min-accu/search_results.csv', delimiter=';')
+        results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-si-min-accu/search_results.csv', delimiter=';')
     elif CL_MODE == 'class' and MODELS == 'CLB' and EVAL_METHOD == 'LR':
         modes_to_plot = ['bp', 'ewc-100000', 'si-100', 'dfc-sparse-rec']
-        results = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-mnist-sparse-rec/search_results.csv', delimiter=';')
-        results_bp = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-split-mnist-bp/search_results.csv', delimiter=';')
-        results_ewc = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-split-mnist-ewc/search_results.csv', delimiter=';')
-        results_si = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-split-mnist-si/search_results.csv', delimiter=';')
+        results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-mnist-sparse-rec/search_results.csv', delimiter=';')
+        results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-bp/search_results.csv', delimiter=';')
+        results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-ewc/search_results.csv', delimiter=';')
+        try:
+            results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-si/search_results.csv', delimiter=';')
+        except OSError as e:
+            results_si = None
     elif CL_MODE == 'class' and MODELS == 'DFC' and EVAL_METHOD == 'LR':
         modes_to_plot = ['dfc-standard', 'dfc-rec', 'dfc-sparse', 'dfc-sparse-rec']
-        results = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-mnist-sparse-rec-all-variants/search_results.csv', delimiter=';')
+        results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-mnist-sparse-rec-all-variants/search_results.csv', delimiter=';')
     elif CL_MODE == 'class' and MODELS == 'CLB' and EVAL_METHOD == 'MIN_ACCU':
         modes_to_plot = ['bp', 'ewc-100000', 'si-100', 'dfc-sparse-rec']
-        results = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-mnist-sparse-rec-min-accu/search_results.csv', delimiter=';')
-        results_bp = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-split-mnist-bp-min-accu/search_results.csv', delimiter=';')
-        results_ewc = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-split-mnist-ewc-min-accu/search_results.csv', delimiter=';')
-        results_si = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-split-mnist-si-min-accu/search_results.csv', delimiter=';')
+        results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-mnist-sparse-rec-min-accu/search_results.csv', delimiter=';')
+        results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-bp-min-accu/search_results.csv', delimiter=';')
+        results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-ewc-min-accu/search_results.csv', delimiter=';')
+        try:
+            results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-si-min-accu/search_results.csv', delimiter=';')
+        except OSError as e:
+            results_si = None
         
     return results, results_bp, results_ewc, results_si, results_l2, modes_to_plot
 
-def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, ylim=None, fontsize=14, display_legend=False, legend_loc=None, xticks=None, yticks=None):
+def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, subdir='.', ylim=None, fontsize=14, display_legend=False, legend_loc=None, xticks=None, yticks=None):
     """
     Plots performance results across LRs or minimum accuracies, according to argument configuration.
     """
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        results, results_bp, results_ewc, results_si, results_l2, modes_to_plot = load_performance_data(CL_MODE, MODELS, EVAL_METHOD)
+        results, results_bp, results_ewc, results_si, results_l2, modes_to_plot = load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir=subdir)
         results, interesting_cols = preprocess_performance_data(results, results_bp, results_ewc, results_si, results_l2, CL_MODE, MODELS, EVAL_METHOD)
 
         plt.rcParams["figure.figsize"] = (FIG_SIZE[0], FIG_SIZE[1])
