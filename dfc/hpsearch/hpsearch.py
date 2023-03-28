@@ -1034,6 +1034,8 @@ def hpsearch_cli_arguments(parser, show_num_searches=True, show_out_dir=True,
     parser.add_argument('--force_permute_labels', action='store_true',
                         help='If provided, sets the permute_labels parameter specified ' +
                              'in the grid to True, overriding the original config setting.')
+    parser.add_argument('--force_include_only_converged_samples', action='store_true',
+                        help='If provided, sets the include_only_converged_samples to true.')
     parser.add_argument('--force_custom_label_permutation', type=str, default=None,
                         help='List of 10 integers representing a custom permutation for the labels.')
     parser.add_argument('--force_num_random_seeds', type=int, default=None,
@@ -1090,6 +1092,8 @@ def run(argv=None, dout_dir='./out/hyperparam_search'):
         grid['dataset'] = [args.force_dataset]
     if args.force_permute_labels:
         grid['permute_labels'] = [True]
+    if args.force_include_only_converged_samples:
+        grid['include_only_converged_samples'] = True
     if args.force_custom_label_permutation:
         grid['custom_label_permutation'] = [args.force_custom_label_permutation]
     if args.force_num_random_seeds:
