@@ -10,8 +10,8 @@ from activation_utils import compute_mean_digit_separations_domainIL, compute_me
 def preprocess_performance_data(results, results_bp, results_ewc, results_si, results_l2, CL_MODE, MODELS, EVAL_METHOD):
 
     interesting_cols = [
-        'task_test_accu_last',
-        'task_train_accu_last',
+        'task_test_accu',
+        'task_train_accu',
         'lr',
         'use_recurrent_weights',
         'lr_rec',
@@ -34,7 +34,6 @@ def preprocess_performance_data(results, results_bp, results_ewc, results_si, re
         'frac_rec_deciding_sparsity',
         'network_type',
         'reg_coef'
-
     ]
     interesting_cols_normal = results.columns[results.columns.isin(interesting_cols)]
     if not results_bp is None:
@@ -116,7 +115,7 @@ def capitalize_label(name):
     name_list[0] = name_list[0].upper()
     return '-'.join(name_list)
 
-def plot_sparsity_mix(ax, lrs, set_ylabel=False, title='', cl_mode='domain', frac_rec_deciding_sparsity=1):
+def plot_sparsity_mix(ax, lrs, set_ylabel=False, title='', cl_mode='domain', frac_rec_deciding_sparsity=1, eval_set='test', eval_idx=-1):
 
     line_fmt='-o'
     markersize=5
@@ -128,8 +127,8 @@ def plot_sparsity_mix(ax, lrs, set_ylabel=False, title='', cl_mode='domain', fra
 
 
     interesting_cols_mix = [
-        'task_test_accu_last',
-        'task_train_accu_last',
+        'task_test_accu',
+        'task_train_accu',
         'lr',
         'use_recurrent_weights',
         'lr_rec',
@@ -153,13 +152,13 @@ def plot_sparsity_mix(ax, lrs, set_ylabel=False, title='', cl_mode='domain', fra
     results_mix = results_mix.sort_values(by='task_test_accu_last', ascending=False)[interesting_cols_mix]
     size = results_mix.iloc[0]['size_hidden']
 
+    results_mix['eval_metric'] = results_mix[f'task_{eval_set}_accu'].apply(lambda x: float(eval(x).split(',')[eval_idx]))
 
-
-    not_groupby_cols_mix = ['task_test_accu_last', 'random_seed', 'lr_rec', 'task_train_accu_last',
+    not_groupby_cols_mix = ['task_test_accu', 'random_seed', 'lr_rec', 'task_train_accu',
                         'rec_learning_neurons', 'rec_grad_normalization', 'permanent-sparsification',
                         'rec_inference_iterations']
 
-    metric_type = "test"
+
     groupby_cols_mix = [x for x in interesting_cols_mix if x not in not_groupby_cols_mix]
     colors = plt.cm.Greys(np.linspace(0,1,7))
     for idx, lr_exp in enumerate(lrs):
@@ -176,8 +175,8 @@ def plot_sparsity_mix(ax, lrs, set_ylabel=False, title='', cl_mode='domain', fra
                 grouped = selected_results.groupby(by=groupby_cols_mix)
                 means = grouped.mean().reset_index()
                 stds = grouped.std().reset_index()
-                ax.errorbar(means['frac_fb_deciding_sparsity'], means[f'task_{metric_type}_accu_last'],
-                            yerr=stds[f'task_{metric_type}_accu_last'], label=f"1e-{lr_exp}", color=colors[idx+2],
+                ax.errorbar(means['frac_fb_deciding_sparsity'], means[f'eval_metric'],
+                            yerr=stds['eval_metric'], label=f"1e-{lr_exp}", color=colors[idx+2],
                             fmt=line_fmt, capsize=capsize, markersize=markersize)
 
     ax.legend(title='Learning rate')
@@ -191,9 +190,9 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
                   interesting_cols, modes_to_plot, CL_MODE, MODELS, EVAL_METHOD,
                   line_fmt='-o', markersize=5, capsize=5, red_mode='dfc-sparse-rec',
                   title='', fontsize=14, display_legend=False, legend_loc=None,
-                  yticks=None, xticks=None):
+                  yticks=None, xticks=None, eval_set='test', eval_idx=-1):
     
-    not_groupby_cols = ['task_test_accu_last', 'random_seed', 'lr_rec', 'task_train_accu_last',
+    not_groupby_cols = ['task_test_accu', 'random_seed', 'lr_rec', 'task_train_accu',
                         'rec_learning_neurons', 'rec_grad_normalization', 'permanent-sparsification',
                         'rec_inference_iterations', 'fw_grad_normalization', 'turn_off_rec_norm_normalization',
                         'hebbian_fw_learning', 'sparsity_level_function', 'frac_rec_deciding_sparsity', 'from_ff_learning',
@@ -204,7 +203,6 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
     if EVAL_METHOD == 'LR':
         not_groupby_cols.append('stop_early_at_accu')
 
-    metric_type = "test"
     groupby_cols = [x for x in interesting_cols if x not in not_groupby_cols]
 
     plotted_curves = []
@@ -215,6 +213,7 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
             ]
 
         selected_results['lr'] = selected_results['lr'].astype(float)
+        selected_results['eval_metric'] = selected_results[f'task_{eval_set}_accu'].apply(lambda x: float(eval(x).split(',')[eval_idx]))
 
 
         if mode.startswith('bp'):
@@ -232,11 +231,11 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
         means = grouped.mean().reset_index()
 
         stds = grouped.std().reset_index()
-        ax.errorbar(means[x_axis_value], means[f'task_{metric_type}_accu_last'],
-                     yerr=stds[f'task_{metric_type}_accu_last'], label=capitalize_label(mode), fmt=line_fmt, markersize=markersize, capsize=capsize,
+        ax.errorbar(means[x_axis_value], means['eval_metric'],
+                     yerr=stds['eval_metric'], label=capitalize_label(mode), fmt=line_fmt, markersize=markersize, capsize=capsize,
                             color=('red' if mode==red_mode else None))
 
-        plotted_curves.append((means[f'task_{metric_type}_accu_last'], stds[f'task_{metric_type}_accu_last'], mode))
+        plotted_curves.append((means['eval_metric'], stds['eval_metric'], mode))
     
     if display_legend:
         ax.legend(prop={'size': fontsize}, loc=legend_loc)
@@ -304,7 +303,7 @@ def plot_peak_aligned_lr_sweep(ax, plotted_curves, CL_MODE, title='',
     ax.set_ylabel(f'Accuracy ({CL_MODE.capitalize()}-IL)', fontsize=fontsize)
     ax.legend(prop={'size': fontsize})
 
-def load_performance_data(CL_MODE, MODELS, EVAL_METHOD):
+def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir=''):
     """
     Loads performance data for given configuration.
     """
@@ -314,48 +313,49 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD):
     results_si = None
     results_l2 = None
 
+    subdir_str = '.' if subdir == '' else subdir
+
     if CL_MODE == 'domain' and MODELS == 'CLB' and EVAL_METHOD == 'LR':
-        modes_to_plot = ['bp', 'ewc-100000', 'si-10', 'dfc-sparse-rec']
-        results = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-mnist-sparse-rec/search_results.csv', delimiter=';')
-        results_bp = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-bp/search_results.csv', delimiter=';')
-        results_ewc = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-ewc/search_results.csv', delimiter=';')
-        results_si = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-si/search_results.csv', delimiter=';')
-        results_l2 = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-l2/search_results.csv', delimiter=';')
+        modes_to_plot = ['bp', 'ewc-100', 'si-1', 'dfc-sparse-rec']
+        results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_domain-mnist-sparse-rec/search_results.csv', delimiter=';')
+        results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_domain-split-mnist-bp/search_results.csv', delimiter=';')
+        results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_domain-split-mnist-ewc/search_results.csv', delimiter=';')
+        results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_domain-split-mnist-si/search_results.csv', delimiter=';')
     elif CL_MODE == 'domain' and MODELS == 'DFC' and EVAL_METHOD == 'LR':
         modes_to_plot = ['dfc-standard', 'dfc-rec', 'dfc-sparse', 'dfc-sparse-rec']
-        results = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-mnist-sparse-rec-all-variants/search_results.csv', delimiter=';')
+        results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_domain-mnist-sparse-rec-all-variants/search_results.csv', delimiter=';')
     elif CL_MODE == 'domain' and MODELS == 'CLB' and EVAL_METHOD == 'MIN_ACCU':
-        modes_to_plot = ['bp', 'ewc-100000', 'si-10', 'dfc-sparse-rec']
-        results = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-mnist-sparse-rec-min-accu/search_results.csv', delimiter=';')
-        results_bp = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-bp-min-accu/search_results.csv', delimiter=';')
-        results_ewc = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-ewc-min-accu/search_results.csv', delimiter=';')
-        results_si = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_domain-split-mnist-si-min-accu/search_results.csv', delimiter=';')
+        modes_to_plot = ['bp', 'ewc-100', 'si-10', 'dfc-sparse-rec']
+        results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_domain-mnist-sparse-rec-min-accu/search_results.csv', delimiter=';')
+        results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_domain-split-mnist-bp-min-accu/search_results.csv', delimiter=';')
+        results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_domain-split-mnist-ewc-min-accu/search_results.csv', delimiter=';')
+        results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_domain-split-mnist-si-min-accu/search_results.csv', delimiter=';')
     elif CL_MODE == 'class' and MODELS == 'CLB' and EVAL_METHOD == 'LR':
-        modes_to_plot = ['bp', 'ewc-100000', 'si-100', 'dfc-sparse-rec']
-        results = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-mnist-sparse-rec/search_results.csv', delimiter=';')
-        results_bp = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-split-mnist-bp/search_results.csv', delimiter=';')
-        results_ewc = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-split-mnist-ewc/search_results.csv', delimiter=';')
-        results_si = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-split-mnist-si/search_results.csv', delimiter=';')
+        modes_to_plot = ['bp', 'ewc-10000', 'si-100', 'dfc-sparse-rec']
+        results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_class-mnist-sparse-rec/search_results.csv', delimiter=';')
+        results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_class-split-mnist-bp/search_results.csv', delimiter=';')
+        results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_class-split-mnist-ewc/search_results.csv', delimiter=';')
+        results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_class-split-mnist-si/search_results.csv', delimiter=';')
     elif CL_MODE == 'class' and MODELS == 'DFC' and EVAL_METHOD == 'LR':
         modes_to_plot = ['dfc-standard', 'dfc-rec', 'dfc-sparse', 'dfc-sparse-rec']
-        results = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-mnist-sparse-rec-all-variants/search_results.csv', delimiter=';')
+        results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_class-mnist-sparse-rec-all-variants/search_results.csv', delimiter=';')
     elif CL_MODE == 'class' and MODELS == 'CLB' and EVAL_METHOD == 'MIN_ACCU':
         modes_to_plot = ['bp', 'ewc-100000', 'si-100', 'dfc-sparse-rec']
-        results = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-mnist-sparse-rec-min-accu/search_results.csv', delimiter=';')
-        results_bp = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-split-mnist-bp-min-accu/search_results.csv', delimiter=';')
-        results_ewc = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-split-mnist-ewc-min-accu/search_results.csv', delimiter=';')
-        results_si = pd.read_csv(os.getcwd() + '/../out/hpsearches-final/hpconfig_class-split-mnist-si-min-accu/search_results.csv', delimiter=';')
+        results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_class-mnist-sparse-rec-min-accu/search_results.csv', delimiter=';')
+        results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_class-split-mnist-bp-min-accu/search_results.csv', delimiter=';')
+        results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_class-split-mnist-ewc-min-accu/search_results.csv', delimiter=';')
+        results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir_str}/hpconfig_class-split-mnist-si-min-accu/search_results.csv', delimiter=';')
         
     return results, results_bp, results_ewc, results_si, results_l2, modes_to_plot
 
-def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, ylim=None, fontsize=14, display_legend=False, legend_loc=None, xticks=None, yticks=None):
+def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, ylim=None, fontsize=14, display_legend=False, legend_loc=None, xticks=None, yticks=None, subdir='', eval_set='test', eval_idx=-1):
     """
     Plots performance results across LRs or minimum accuracies, according to argument configuration.
     """
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        results, results_bp, results_ewc, results_si, results_l2, modes_to_plot = load_performance_data(CL_MODE, MODELS, EVAL_METHOD)
+        results, results_bp, results_ewc, results_si, results_l2, modes_to_plot = load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir=subdir)
         results, interesting_cols = preprocess_performance_data(results, results_bp, results_ewc, results_si, results_l2, CL_MODE, MODELS, EVAL_METHOD)
 
         plt.rcParams["figure.figsize"] = (FIG_SIZE[0], FIG_SIZE[1])
@@ -364,7 +364,8 @@ def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, ylim=None,
         plotted_curves = plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
                                        interesting_cols, modes_to_plot, CL_MODE, MODELS, EVAL_METHOD,
                                        title='', fontsize=fontsize, display_legend=display_legend,
-                                       legend_loc=legend_loc, xticks=xticks, yticks=yticks)
+                                       legend_loc=legend_loc, xticks=xticks, yticks=yticks, eval_set=eval_set,
+                                       eval_idx=eval_idx)
         if ylim:
             plt.ylim(ylim)
         plt.xticks(fontsize=fontsize)
