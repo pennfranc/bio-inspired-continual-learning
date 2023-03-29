@@ -235,6 +235,8 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
         grouped = selected_results.groupby(by=group_by_cols_curr)
         means = grouped.mean().reset_index()
 
+        print(mode, 'max window mean', means['task_test_accu_last'].rolling(6).mean().max())
+
         stds = grouped.std().reset_index()
         ax.errorbar(means[x_axis_value], means[f'task_{metric_type}_accu_last'],
                      yerr=stds[f'task_{metric_type}_accu_last'], label=capitalize_label(mode), fmt=line_fmt, markersize=markersize, capsize=capsize,
