@@ -364,7 +364,7 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         
     return results, results_bp, results_ewc, results_si, results_l2, modes_to_plot
 
-def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, subdir='.', ylim=None, fontsize=14, display_legend=False, legend_loc=None, xticks=None, yticks=None):
+def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, subdir='.', ylim=None, fontsize=14, display_legend=False, legend_loc=None, xticks=None, yticks=None, plot_peak_aligned=False):
     """
     Plots performance results across LRs or minimum accuracies, according to argument configuration.
     """
@@ -388,7 +388,7 @@ def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, subdir='.'
         fig.savefig(f'{FIG_DIR}{CL_MODE=}-{MODELS=}-{EVAL_METHOD=}.svg', format='svg', bbox_inches = "tight")
         
         # Aligned plot
-        if EVAL_METHOD == 'LR':
+        if EVAL_METHOD == 'LR' and plot_peak_aligned:
             fig, ax = plt.subplots(nrows=1, ncols=1)
             plot_peak_aligned_lr_sweep(ax, plotted_curves, CL_MODE, title='', min_accu=0.75 if CL_MODE == 'domain' else 0.3, max_length=6)
             plt.xticks(fontsize=fontsize)
