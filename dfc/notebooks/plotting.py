@@ -265,7 +265,7 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
         ax.set_yticks(yticks, yticks)
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
     if xticks is not None:
-        ax.set_xticks(xticks, xticks)
+        ax.set_xticks(xticks)
         ax.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
         
     return plotted_curves
@@ -321,7 +321,10 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
     results_l2 = None
 
     if CL_MODE == 'domain' and MODELS == 'CLB' and EVAL_METHOD == 'LR':
-        modes_to_plot = ['bp', 'ewc-100', 'si-10', 'dfc-sparse-rec']
+        if subdir == 'split_fashion_mnist-permuted':
+            modes_to_plot = ['bp', 'ewc-1000', 'si-10', 'dfc-sparse-rec']
+        else:
+            modes_to_plot = ['bp', 'ewc-100000', 'si-10', 'dfc-sparse-rec']
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-mnist-sparse-rec/search_results.csv', delimiter=';')
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-bp/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-ewc/search_results.csv', delimiter=';')
@@ -337,13 +340,19 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         modes_to_plot = ['dfc-standard', 'dfc-rec', 'dfc-sparse', 'dfc-sparse-rec']
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-mnist-sparse-rec-all-variants/search_results.csv', delimiter=';')
     elif CL_MODE == 'domain' and MODELS == 'CLB' and EVAL_METHOD == 'MIN_ACCU':
-        modes_to_plot = ['bp', 'ewc-100000', 'si-10', 'dfc-sparse-rec']
+        if subdir == 'split_fashion_mnist-permuted':
+            modes_to_plot = ['bp', 'ewc-1000', 'si-10', 'dfc-sparse-rec']
+        else:
+            modes_to_plot = ['bp', 'ewc-100000', 'si-10', 'dfc-sparse-rec']
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-mnist-sparse-rec-min-accu/search_results.csv', delimiter=';')
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-bp-min-accu/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-ewc-min-accu/search_results.csv', delimiter=';')
         results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-si-min-accu/search_results.csv', delimiter=';')
     elif CL_MODE == 'class' and MODELS == 'CLB' and EVAL_METHOD == 'LR':
-        modes_to_plot = ['bp', 'ewc-100000', 'si-100', 'dfc-sparse-rec']
+        if subdir == 'split_fashion_mnist-permuted':
+            modes_to_plot = ['bp', 'ewc-1000', 'si-1000', 'dfc-sparse-rec']
+        else:
+            modes_to_plot = ['bp', 'ewc-100000', 'si-100', 'dfc-sparse-rec']
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-mnist-sparse-rec/search_results.csv', delimiter=';')
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-bp/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-ewc/search_results.csv', delimiter=';')
@@ -355,7 +364,10 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         modes_to_plot = ['dfc-standard', 'dfc-rec', 'dfc-sparse', 'dfc-sparse-rec']
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-mnist-sparse-rec-all-variants/search_results.csv', delimiter=';')
     elif CL_MODE == 'class' and MODELS == 'CLB' and EVAL_METHOD == 'MIN_ACCU':
-        modes_to_plot = ['bp', 'ewc-100000', 'si-100', 'dfc-sparse-rec']
+        if subdir == 'split_fashion_mnist-permuted':
+            modes_to_plot = ['bp', 'ewc-1000', 'si-1000', 'dfc-sparse-rec']
+        else:
+            modes_to_plot = ['bp', 'ewc-100000', 'si-100', 'dfc-sparse-rec']
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-mnist-sparse-rec-min-accu/search_results.csv', delimiter=';')
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-bp-min-accu/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-ewc-min-accu/search_results.csv', delimiter=';')
@@ -387,7 +399,7 @@ def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, subdir='.'
             plt.ylim(ylim)
         plt.xticks(fontsize=fontsize)
         plt.yticks(fontsize=fontsize)
-        fig.savefig(f'{FIG_DIR}{CL_MODE=}-{MODELS=}-{EVAL_METHOD=}.svg', format='svg', bbox_inches = "tight")
+        fig.savefig(f'{FIG_DIR}/{CL_MODE=}-{MODELS=}-{EVAL_METHOD=}-{subdir}.svg', format='svg', bbox_inches = "tight")
         
         # Aligned plot
         if EVAL_METHOD == 'LR' and plot_peak_aligned:
@@ -395,7 +407,7 @@ def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, subdir='.'
             plot_peak_aligned_lr_sweep(ax, plotted_curves, CL_MODE, title='', min_accu=0.75 if CL_MODE == 'domain' else 0.3, max_length=6)
             plt.xticks(fontsize=fontsize)
             plt.yticks(fontsize=fontsize)
-            fig.savefig(f'{FIG_DIR}{CL_MODE=}-{MODELS=}-{EVAL_METHOD=}-LR_aligned.svg', format='svg', bbox_inches = "tight")
+            fig.savefig(f'{FIG_DIR}/{CL_MODE=}-{MODELS=}-{EVAL_METHOD=}-{subdir}-LR_aligned.svg', format='svg', bbox_inches = "tight")
 
 def plot_normalized_separation_domainIL(name, ax, num_seeds, tgt_overlap_vals, task_overlap_vals, lrs, red_mode='dfc-sparse-rec'):
     """
