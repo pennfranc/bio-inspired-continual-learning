@@ -27,36 +27,36 @@ args = parser.parse_args()
 
 configs = [
     # class-IL
-    #'hpconfig_class-mnist-sparse-rec',
-    #'hpconfig_class-mnist-sparse-rec-all-variants',
-    #'hpconfig_class-split-mnist-bp',
-    #'hpconfig_class-split-mnist-ewc',
+    'hpconfig_class-mnist-sparse-rec',
+    'hpconfig_class-mnist-sparse-rec-all-variants',
+    'hpconfig_class-split-mnist-bp',
+    'hpconfig_class-split-mnist-ewc',
     'hpconfig_class-split-mnist-si',
 
-    #'hpconfig_class-mnist-sparse-rec-min-accu',
-    #'hpconfig_class-split-mnist-bp-min-accu',
-    #'hpconfig_class-split-mnist-ewc-min-accu',
-    #'hpconfig_class-split-mnist-si-min-accu',
+    'hpconfig_class-mnist-sparse-rec-min-accu',
+    'hpconfig_class-split-mnist-bp-min-accu',
+    'hpconfig_class-split-mnist-ewc-min-accu',
+    'hpconfig_class-split-mnist-si-min-accu',
 
-    #'hpconfig_class-mnist-sparse-rec-sparsity-deciding-mix',
+    'hpconfig_class-mnist-sparse-rec-sparsity-deciding-mix',
 
 
     # domain-IL
-    #'hpconfig_domain-split-mnist-bp',
-    #'hpconfig_domain-mnist-sparse-rec',
+    'hpconfig_domain-split-mnist-bp',
+    'hpconfig_domain-mnist-sparse-rec',
     'hpconfig_domain-mnist-sparse-rec-all-variants',
     
-    #'hpconfig_domain-split-mnist-ewc',
+    'hpconfig_domain-split-mnist-ewc',
     'hpconfig_domain-split-mnist-si',
-    #'hpconfig_domain-split-mnist-l2',
+    'hpconfig_domain-split-mnist-l2',
 
-    #'hpconfig_domain-mnist-sparse-rec-min-accu',
-    #'hpconfig_domain-split-mnist-bp-min-accu',
-    #'hpconfig_domain-split-mnist-ewc-min-accu',
-    #'hpconfig_domain-split-mnist-si-min-accu',
+    'hpconfig_domain-mnist-sparse-rec-min-accu',
+    'hpconfig_domain-split-mnist-bp-min-accu',
+    'hpconfig_domain-split-mnist-ewc-min-accu',
+    'hpconfig_domain-split-mnist-si-min-accu',
 
-    #'hpconfig_domain-mnist-sparse-rec-sparsity-deciding-mix',
-    #'hpconfig_domain-mnist-sparse-rec-sparsity-search',
+    'hpconfig_domain-mnist-sparse-rec-sparsity-deciding-mix',
+    'hpconfig_domain-mnist-sparse-rec-sparsity-search',
     
 ]
 
