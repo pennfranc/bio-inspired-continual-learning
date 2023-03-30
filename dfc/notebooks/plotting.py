@@ -328,14 +328,9 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-mnist-sparse-rec/search_results.csv', delimiter=';')
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-bp/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-ewc/search_results.csv', delimiter=';')
-        try:
-            results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-si/search_results.csv', delimiter=';')
-        except OSError as e:
-            results_si = None
-        try:
-            results_l2 = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-l2/search_results.csv', delimiter=';')
-        except OSError as e:
-            results_l2 = None
+        results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-si/search_results.csv', delimiter=';')
+        #results_l2 = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-l2/search_results.csv', delimiter=';')
+
     elif CL_MODE == 'domain' and MODELS == 'DFC' and EVAL_METHOD == 'LR':
         modes_to_plot = ['dfc-standard', 'dfc-rec', 'dfc-sparse', 'dfc-sparse-rec']
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-mnist-sparse-rec-all-variants/search_results.csv', delimiter=';')
@@ -356,10 +351,8 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-mnist-sparse-rec/search_results.csv', delimiter=';')
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-bp/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-ewc/search_results.csv', delimiter=';')
-        try:
-            results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-si/search_results.csv', delimiter=';')
-        except OSError as e:
-            results_si = None
+        results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-si/search_results.csv', delimiter=';')
+
     elif CL_MODE == 'class' and MODELS == 'DFC' and EVAL_METHOD == 'LR':
         modes_to_plot = ['dfc-standard', 'dfc-rec', 'dfc-sparse', 'dfc-sparse-rec']
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-mnist-sparse-rec-all-variants/search_results.csv', delimiter=';')
@@ -371,10 +364,8 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-mnist-sparse-rec-min-accu/search_results.csv', delimiter=';')
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-bp-min-accu/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-ewc-min-accu/search_results.csv', delimiter=';')
-        try:
-            results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-si-min-accu/search_results.csv', delimiter=';')
-        except OSError as e:
-            results_si = None
+        results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-si-min-accu/search_results.csv', delimiter=';')
+
         
     return results, results_bp, results_ewc, results_si, results_l2, modes_to_plot
 
