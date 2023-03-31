@@ -324,7 +324,7 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         if subdir == 'split_fashion_mnist-permuted':
             modes_to_plot = ['bp', 'ewc-1000', 'si-10', 'dfc-sparse-rec']
         else:
-            modes_to_plot = ['bp', 'ewc-100000', 'si-10', 'dfc-sparse-rec']
+            modes_to_plot = ['bp', 'ewc-1000', 'si-10', 'dfc-sparse-rec']
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-mnist-sparse-rec/search_results.csv', delimiter=';')
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-bp/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-ewc/search_results.csv', delimiter=';')
@@ -338,7 +338,7 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         if subdir == 'split_fashion_mnist-permuted':
             modes_to_plot = ['bp', 'ewc-1000', 'si-10', 'dfc-sparse-rec']
         else:
-            modes_to_plot = ['bp', 'ewc-100000', 'si-10', 'dfc-sparse-rec']
+            modes_to_plot = ['bp', 'ewc-1000', 'si-10', 'dfc-sparse-rec']
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-mnist-sparse-rec-min-accu/search_results.csv', delimiter=';')
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-bp-min-accu/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-ewc-min-accu/search_results.csv', delimiter=';')
@@ -347,7 +347,7 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         if subdir == 'split_fashion_mnist-permuted':
             modes_to_plot = ['bp', 'ewc-1000', 'si-1000', 'dfc-sparse-rec']
         else:
-            modes_to_plot = ['bp', 'ewc-100000', 'si-100', 'dfc-sparse-rec']
+            modes_to_plot = ['bp', 'ewc-1000', 'si-100', 'dfc-sparse-rec']
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-mnist-sparse-rec/search_results.csv', delimiter=';')
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-bp/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-ewc/search_results.csv', delimiter=';')
@@ -360,7 +360,7 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         if subdir == 'split_fashion_mnist-permuted':
             modes_to_plot = ['bp', 'ewc-1000', 'si-1000', 'dfc-sparse-rec']
         else:
-            modes_to_plot = ['bp', 'ewc-100000', 'si-100', 'dfc-sparse-rec']
+            modes_to_plot = ['bp', 'ewc-1000', 'si-100', 'dfc-sparse-rec']
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-mnist-sparse-rec-min-accu/search_results.csv', delimiter=';')
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-bp-min-accu/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-ewc-min-accu/search_results.csv', delimiter=';')
