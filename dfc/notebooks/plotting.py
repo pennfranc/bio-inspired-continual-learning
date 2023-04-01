@@ -390,7 +390,9 @@ def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, subdir='.'
             plt.ylim(ylim)
         plt.xticks(fontsize=fontsize)
         plt.yticks(fontsize=fontsize)
-        fig.savefig(f'{FIG_DIR}/{CL_MODE=}-{MODELS=}-{EVAL_METHOD=}-{subdir}.svg', format='svg', bbox_inches = "tight")
+
+        subdir_str = '' if subdir == '.' else f'-{subdir}'
+        fig.savefig(f'{FIG_DIR}/{CL_MODE=}-{MODELS=}-{EVAL_METHOD=}{subdir_str}.svg', format='svg', bbox_inches = "tight")
         
         # Aligned plot
         if EVAL_METHOD == 'LR' and plot_peak_aligned:
