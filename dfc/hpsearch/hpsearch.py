@@ -1093,7 +1093,7 @@ def run(argv=None, dout_dir='./out/hyperparam_search'):
     if args.force_permute_labels:
         grid['permute_labels'] = [True]
     if args.force_include_only_converged_samples:
-        grid['include_only_converged_samples'] = True
+        grid['include_only_converged_samples'] = [True]
     if args.force_custom_label_permutation:
         grid['custom_label_permutation'] = [args.force_custom_label_permutation]
     if args.force_num_random_seeds:
