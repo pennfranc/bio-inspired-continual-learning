@@ -98,9 +98,8 @@ grid = {
     'lr_rec': [40],
     'permanent_sparsification': [False],
     'random_seed': [1, 2, 3, 4, 5],
-    'frac_fb_deciding_sparsity': [0.0, 0.5, 1.0],
-    'frac_rec_deciding_sparsity': [0.0, 1.0],
-    'inst_system_dynamics': [True]
+    'frac_fb_deciding_sparsity': [0.0, 0.25, 0.5, 0.75, 1.0],
+    'frac_rec_deciding_sparsity': [1.0]
     #'sparsity_level_function': ['constant'],  # NEW
 }
 
