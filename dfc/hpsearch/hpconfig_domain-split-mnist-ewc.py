@@ -59,7 +59,7 @@ grid = {
     ### Network options ###
     'hidden_activation': ['relu'],
     'size_hidden': ["20"],
-    'reg_coef': [1000, 10000, 100000, 1000000, 10000000],
+    'reg_coef': [1, 10, 100, 1000, 10000, 100000, 1000000],
 
     ### Training options ###
     'epochs': [4],

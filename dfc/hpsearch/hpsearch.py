@@ -1029,7 +1029,20 @@ def hpsearch_cli_arguments(parser, show_num_searches=True, show_out_dir=True,
                              'Default: %(default)s.')
     parser.add_argument('--random_seed', type=int, metavar='N', default=42,
                         help='Random seed. Default: %(default)s.')
-
+    parser.add_argument('--force_dataset', type=str, default='',
+                        help='If provided, overrides dataset specified in grid.')
+    parser.add_argument('--force_permute_labels', action='store_true',
+                        help='If provided, sets the permute_labels parameter specified ' +
+                             'in the grid to True, overriding the original config setting.')
+    parser.add_argument('--force_include_only_converged_samples', action='store_true',
+                        help='If provided, sets the include_only_converged_samples to true.')
+    parser.add_argument('--force_custom_label_permutation', type=str, default=None,
+                        help='List of 10 integers representing a custom permutation for the labels.')
+    parser.add_argument('--force_num_random_seeds', type=int, default=None,
+                        help='Number of random seeds used, overriding the original config setting.')
+    parser.add_argument('--force_hidden_activation', type=str, default=None,
+                        help='If provided, overrides the hidden_activation arg in the config.')
+        
 def run(argv=None, dout_dir='./out/hyperparam_search'):
     """Run the hyperparameter search script.
 
@@ -1075,6 +1088,18 @@ def run(argv=None, dout_dir='./out/hyperparam_search'):
     print('Loaded hp config from %s.' % grid_module.__file__)
     assert hasattr(grid_module, 'grid') and hasattr(grid_module, 'conditions')
     grid = grid_module.grid
+    if args.force_dataset != '':
+        grid['dataset'] = [args.force_dataset]
+    if args.force_permute_labels:
+        grid['permute_labels'] = [True]
+    if args.force_include_only_converged_samples:
+        grid['include_only_converged_samples'] = [True]
+    if args.force_custom_label_permutation:
+        grid['custom_label_permutation'] = [args.force_custom_label_permutation]
+    if args.force_num_random_seeds:
+        grid['random_seed'] = list(range(args.force_num_random_seeds))
+    if args.force_hidden_activation:
+        grid['hidden_activation'] = [args.force_hidden_activation]
     conditions = grid_module.conditions
 
     grid_config_provided = len(args.grid_config) > 0

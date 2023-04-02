@@ -57,50 +57,25 @@ grid = {
     'dataset': ['split_mnist'],
 
     ### Network options ###
-    'hidden_activation': ['tanh'],
-    'size_hidden': ["256,256,256"],
+    'hidden_activation': ['relu'],
+    'size_hidden': ["22,22", "25,25"],
 
     ### Training options ###
-    'double_precision': [True],
-    'epochs': [1, 2, 3],
-    'ss': [True],
-    'tau_noise': [0.05],
-    'tau_f': [0.5],
-    'dt_di': [0.001],
-    'tmax_di': [500],
-    'inst_transmission': [True],
-    'time_constant_ratio': [0.03553062335953924],
-    'sigma': [0.15],
-    'strong_feedback': [True],
-    'learning_rule': ["nonlinear_difference"],
-    'proactive_controller': [True],
-    'cl_mode': ['class'],
-    'target_class_value': [0.9],
-    'clip_grad_norm': [1],
+    'epochs': [4],
+    'cl_mode': ['domain'],
+    'clip_grad_norm': [-1],
     'initialization': ['xavier'],
     'optimizer': ['Adam'],
     'adam_beta1': [0.9],
     'adam_epsilon': [0.00023225688276019436],
     'batch_size': [512],
-    'lr': [0.00001, 0.0001, 0.001, 0.01],
-    'use_jacobian_as_fb': [True],
-    'error_as_loss_grad': [True],
-    'layer_max_sparsities': ["0.2,0.4,0.6,0.8", "0,0.4,0.6,0.8"],
+    'lr': [1 / 10**(i / 2) for i in range(2, 13, 1)],
     
-    'maintain_total_activity': [True],
-    'freeze_suppressed_neuron_weights': [False],
-    'limited_batch_nr': [4, 16]
+    'random_seed': [1, 2, 3, 4, 5],
+    'num_tasks': [5],
+    'shuffle_tasks': [False]
 }
 
-"""
-'layer_max_sparsities': [
-        f"{s1},{s2},{s3},{s4}"
-        for s1 in [0, 0.3]
-        for s2 in [0, 0.3, 0.6]
-        for s3 in [0, 0.3, 0.6, 0.8, 0.9]
-        for s4 in [0, 0.3, 0.6, 0.8, 0.9]
-    ]
-"""
 # Sometimes, not the whole grid should be searched. For instance, if an SGD
 # optimizer has been chosen, then it doesn't make sense to search over multiple
 # beta2 values of an Adam optimizer.
@@ -116,12 +91,7 @@ grid = {
 # Note, if arguments are commented out above but appear in the conditions, the
 # condition will be ignored.
 conditions = [
-    # Note, we specify a particular set of base conditions below that should
-    # always be enforces: "_BASE_CONDITIONS".
 
-    ### Add your conditions here ###
-    #({'clip_grad_value': [1.]}, {'clip_grad_norm': [-1]}),
-    #({'clip_grad_norm': [1.]}, {'clip_grad_value': [-1]}),
 ]
 
 ####################################
@@ -134,7 +104,7 @@ conditions = conditions + _BASE_CONDITIONS
 # Name of the script that should be executed by the hyperparameter search.
 # Note, the working directory is set seperately by the hyperparameter search
 # script, so don't include paths.
-_SCRIPT_NAME = 'run_dfc.py'
+_SCRIPT_NAME = 'run_bp.py'
 
 # This file is expected to reside in the output folder of the simulation.
 _SUMMARY_FILENAME = 'performance_overview.txt'
@@ -146,7 +116,9 @@ _SUMMARY_KEYWORDS = [
     'task_test_loss',
     'task_test_accu',
     'task_test_loss_last',
-    'task_test_accu_last'
+    'task_test_accu_last',
+    'task_train_loss_last',
+    'task_train_accu_last'
 ]
 
 # The name of the command-line argument that determines the output folder
@@ -224,5 +196,3 @@ _ARGPARSE_HANDLE = lambda argv : parse_cmd_arguments(network_type='BP',
 
 if __name__ == '__main__':
     pass
-
-

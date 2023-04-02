@@ -22,7 +22,7 @@ lr_rec = 40
 num_seeds = 5
 size = "20,20" if cl_mode == 'domain' else '200,200'
 sparsity = '0.4,0.8,0.5' if cl_mode == 'domain' else '0.2,0.8,0'
-lr_neg_exponents = [1.0, 2.0, 2.5, 3, 3.5, 4, 4.5, 5.0, 5.5] if cl_mode == 'class' else [1.0, 2.0, 2.5, 3, 3.5, 4, 4.5, 5.0]
+lr_neg_exponents = [1.0, 1.5, 2.0, 2.5, 3, 3.5, 4, 4.5, 5.0, 5.5] if cl_mode == 'class' else [1.0, 1.5, 2.0, 2.5, 3, 3.5, 4, 4.5, 5.0]
 num_classes_per_task = 2
 epochs = int((20 // num_classes_per_task) * num_classes_per_task / (10 // num_classes_per_task))
 
