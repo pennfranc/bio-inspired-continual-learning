@@ -57,23 +57,46 @@ grid = {
     'dataset': ['split_mnist'],
 
     ### Network options ###
-    'hidden_activation': ['relu'],
-    'size_hidden': ["20,20", "30,30"],
+    'hidden_activation': ['tanh'],
+    'size_hidden': ["20,20", "30,30", "50,50"],
 
     ### Training options ###
+    'double_precision': [True],
     'epochs': [4],
+    'ss': [True],
+    'tau_noise': [0.05],
+    'tau_f': [0.5],
+    'dt_di': [0.001],
+    'tmax_di': [500],
+    'inst_transmission': [True],
+    'time_constant_ratio': [0.03553062335953924],
+    'sigma': [0.15],
+    'strong_feedback': [True],
+    'learning_rule': ["nonlinear_difference"],
+    'proactive_controller': [True],
     'cl_mode': ['domain'],
-    'clip_grad_norm': [-1],
+    'target_class_value': [0.9],
+    'clip_grad_norm': [1],
     'initialization': ['xavier'],
     'optimizer': ['Adam'],
     'adam_beta1': [0.9],
     'adam_epsilon': [0.00023225688276019436],
     'batch_size': [512],
     'lr': [1 / 10**(i / 2) for i in range(2, 13, 1)],
+    'use_jacobian_as_fb': [True],
+    'error_as_loss_grad': [True],
+    'layer_max_sparsities': ["0.4,0.8,0.5"],
     
-    'random_seed': [1, 2, 3, 4, 5],
-    'num_tasks': [5],
-    'shuffle_tasks': [False]
+    'use_recurrent_weights': [False],
+    'rec_learning_neurons': ['suppressed_only'],
+    'rec_grad_normalization': ['incoming'],
+    'maintain_total_activity': [False],
+    'freeze_suppressed_neuron_weights': [True],
+    'rec_adaptation': [-1],
+    'fw_grad_normalization': ['incoming'],
+    'lr_rec': [40],
+    'permanent_sparsification': [False],
+    'random_seed': [1, 2, 3, 4, 5]
 }
 
 # Sometimes, not the whole grid should be searched. For instance, if an SGD
@@ -91,7 +114,28 @@ grid = {
 # Note, if arguments are commented out above but appear in the conditions, the
 # condition will be ignored.
 conditions = [
+    # Note, we specify a particular set of base conditions below that should
+    # always be enforces: "_BASE_CONDITIONS".
 
+    ### Add your conditions here ###
+    ({'layer_max_sparsities': ["0,0,0"]}, {'maintain_total_activity': [False],
+                                           'freeze_suppressed_neuron_weights': [False],
+                                           'rec_adaptation': [-1],
+                                           'rec_learning_neurons': ['all']}),
+    ({'use_recurrent_weights': [False]}, {'rec_adaptation': [-1],
+                                          'rec_learning_neurons': [''],
+                                          'rec_grad_normalization': [''],
+                                          'lr_rec': [0]}),
+     ({'rec_learning_neurons': ['rec_adaptation_only']}, {'rec_adaptation': [1, 10, 20, 40]}),
+     ({'permanent_sparsification': [True]}, {'layer_max_sparsities': [grid['layer_max_sparsities'][-1]],
+                                             'use_recurrent_weights': [False],
+                                             'maintain_total_activity': [False],
+                                             'freeze_suppressed_neuron_weights': [False],
+                                             'rec_adaptation': [-1],
+                                             'rec_learning_neurons': [''],
+                                             'rec_grad_normalization': [''],
+                                             'lr_rec': [0]})
+    #({'clip_grad_norm': [1.]}, {'clip_grad_value': [-1]}),
 ]
 
 ####################################
@@ -104,7 +148,7 @@ conditions = conditions + _BASE_CONDITIONS
 # Name of the script that should be executed by the hyperparameter search.
 # Note, the working directory is set seperately by the hyperparameter search
 # script, so don't include paths.
-_SCRIPT_NAME = 'run_bp.py'
+_SCRIPT_NAME = 'run_dfc.py'
 
 # This file is expected to reside in the output folder of the simulation.
 _SUMMARY_FILENAME = 'performance_overview.txt'
@@ -196,3 +240,5 @@ _ARGPARSE_HANDLE = lambda argv : parse_cmd_arguments(network_type='BP',
 
 if __name__ == '__main__':
     pass
+
+
