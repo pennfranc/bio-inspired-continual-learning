@@ -1042,6 +1042,8 @@ def hpsearch_cli_arguments(parser, show_num_searches=True, show_out_dir=True,
                         help='Number of random seeds used, overriding the original config setting.')
     parser.add_argument('--force_hidden_activation', type=str, default=None,
                         help='If provided, overrides the hidden_activation arg in the config.')
+    parser.add_argument('--force_num_tasks_per_dataset', type=int, default=None,
+                    help='Number of tasks for dataset for split_combined_mnist, overriding arg in config.')
         
 def run(argv=None, dout_dir='./out/hyperparam_search'):
     """Run the hyperparameter search script.
@@ -1100,6 +1102,8 @@ def run(argv=None, dout_dir='./out/hyperparam_search'):
         grid['random_seed'] = list(range(args.force_num_random_seeds))
     if args.force_hidden_activation:
         grid['hidden_activation'] = [args.force_hidden_activation]
+    if args.force_num_tasks_per_dataset:
+        grid['num_tasks_per_dataset'] = [args.force_num_tasks_per_dataset]
     conditions = grid_module.conditions
 
     grid_config_provided = len(args.grid_config) > 0

@@ -22,40 +22,43 @@ parser.add_argument('--force_num_random_seeds', type=int, default=None,
                     help='Number of random seeds, overriding the original config setting.')
 parser.add_argument('--force_hidden_activation', type=str, default=None,
                     help='If provided, overrides the hidden_activation arg in the config.')
+parser.add_argument('--force_num_tasks_per_dataset', type=int, default=None,
+                    help='Number of tasks for dataset for split_combined_mnist, overriding arg in config.')
 args = parser.parse_args()
 
 
 configs = [
     # class-IL
-    'hpconfig_class-mnist-sparse-rec',
-    'hpconfig_class-mnist-sparse-rec-all-variants',
-    'hpconfig_class-split-mnist-bp',
-    'hpconfig_class-split-mnist-ewc',
-    'hpconfig_class-split-mnist-si',
-
-    'hpconfig_class-mnist-sparse-rec-min-accu',
-    'hpconfig_class-split-mnist-bp-min-accu',
-    'hpconfig_class-split-mnist-ewc-min-accu',
-    'hpconfig_class-split-mnist-si-min-accu',
-
-    'hpconfig_class-mnist-sparse-rec-sparsity-deciding-mix',
+    #'hpconfig_class-mnist-sparse-rec',
+    #'hpconfig_class-mnist-sparse-rec',
+    #'hpconfig_class-mnist-sparse-rec-all-variants',
+    #'hpconfig_class-split-mnist-bp',
+    #'hpconfig_class-split-mnist-ewc',
+    #'hpconfig_class-split-mnist-si',
+#
+    #'hpconfig_class-mnist-sparse-rec-min-accu',
+    #'hpconfig_class-split-mnist-bp-min-accu',
+    #'hpconfig_class-split-mnist-ewc-min-accu',
+    #'hpconfig_class-split-mnist-si-min-accu',
+#
+    #'hpconfig_class-mnist-sparse-rec-sparsity-deciding-mix',
 
 
     # domain-IL
     'hpconfig_domain-split-mnist-bp',
-    'hpconfig_domain-mnist-sparse-rec',
-    'hpconfig_domain-mnist-sparse-rec-all-variants',
-    
-    'hpconfig_domain-split-mnist-ewc',
-    'hpconfig_domain-split-mnist-si',
-
-    'hpconfig_domain-mnist-sparse-rec-min-accu',
-    'hpconfig_domain-split-mnist-bp-min-accu',
-    'hpconfig_domain-split-mnist-ewc-min-accu',
-    'hpconfig_domain-split-mnist-si-min-accu',
-
+    #'hpconfig_domain-mnist-sparse-rec',
+    #'hpconfig_domain-mnist-sparse-rec-all-variants',
+    #
+    #'hpconfig_domain-split-mnist-ewc',
+    #'hpconfig_domain-split-mnist-si',
+#
+    #'hpconfig_domain-mnist-sparse-rec-min-accu',
+    #'hpconfig_domain-split-mnist-bp-min-accu',
+    #'hpconfig_domain-split-mnist-ewc-min-accu',
+    #'hpconfig_domain-split-mnist-si-min-accu',
+#
     #'hpconfig_domain-mnist-sparse-rec-sparsity-deciding-mix',
-    'hpconfig_domain-mnist-sparse-rec-sparsity-search',
+    #'hpconfig_domain-mnist-sparse-rec-sparsity-search',
     
 ]
 
@@ -63,15 +66,18 @@ dataset_subdir_string = '.' if args.force_dataset == '' else args.force_dataset
 permute_subdir_string = '-permuted' if args.force_permute_labels else ''
 converged_subdir_string = '-converged_only' if args.force_include_only_converged_samples else ''
 hidden_activation_string = f'-{args.force_hidden_activation}' if args.force_hidden_activation else ''
+num_tasks_per_dataset_string = f'-num_tasks_per_dataset={args.force_num_tasks_per_dataset}' if args.force_num_tasks_per_dataset else ''
 permute_labels_flag = '--force_permute_labels' if args.force_permute_labels else ''
 include_only_converged_samples_flag = '--force_include_only_converged_samples' if args.force_include_only_converged_samples else ''
 random_seeds_flag = f'--force_num_random_seeds={args.force_num_random_seeds}' if args.force_num_random_seeds else ''
 hidden_activation_flag = f'--force_hidden_activation={args.force_hidden_activation}' if args.force_hidden_activation else ''
+num_tasks_per_dataset_flag = f'--force_num_tasks_per_dataset={args.force_num_tasks_per_dataset}' if args.force_num_tasks_per_dataset else ''
+
 
 if args.force_custom_label_permutation:
     permute_subdir_string = f'-custom_label_permutation={args.force_custom_label_permutation}'
     permute_labels_flag = f'--force_custom_label_permutation={args.force_custom_label_permutation}'
 
 for config in configs:
-    return_code = subprocess.Popen(f"python3 -m hpsearch.hpsearch --visible_gpus={args.visible_gpus} --force_dataset={args.force_dataset} {permute_labels_flag} {random_seeds_flag} {hidden_activation_flag} {include_only_converged_samples_flag} --max_num_jobs_per_gpu=1 --allowed_memory=0.3 --grid_module=hpsearch.{config} --force_out_dir --out_dir=out/hpsearches-final/{dataset_subdir_string}{permute_subdir_string}{hidden_activation_string}{converged_subdir_string}/{config} --run_cwd=.", shell=True)
+    return_code = subprocess.Popen(f"python3 -m hpsearch.hpsearch --visible_gpus={args.visible_gpus} --force_dataset={args.force_dataset} {permute_labels_flag} {random_seeds_flag} {hidden_activation_flag} {num_tasks_per_dataset_flag} {include_only_converged_samples_flag} --max_num_jobs_per_gpu=1 --allowed_memory=0.3 --grid_module=hpsearch.{config} --force_out_dir --out_dir=out/hpsearches-final/{dataset_subdir_string}{permute_subdir_string}{hidden_activation_string}{converged_subdir_string}{num_tasks_per_dataset_string}/{config} --run_cwd=.", shell=True)
     return_code.wait()

@@ -128,6 +128,28 @@ def generate_task(config, logger, device):
             dwrappers.append(dwrapper)
 
         dhandler = dwrappers
+    
+    elif config.dataset == 'split_combined_mnist':
+        dhandlers_mnist = get_split_mnist_handlers(MNIST_DIR, use_one_hot=True, cl_mode=config.cl_mode,
+                                             num_classes_per_task=config.num_classes_per_task, permute_labels=config.permute_labels,
+                                             custom_permutation=config.custom_label_permutation, kmnist=False)
+        dhandlers_fashion_mnist = get_split_fashion_mnist_handlers(FASHION_MNIST_DIR, use_one_hot=True, cl_mode=config.cl_mode,
+                                             num_classes_per_task=config.num_classes_per_task, permute_labels=config.permute_labels,
+                                             custom_permutation=config.custom_label_permutation)
+
+        dhandlers = dhandlers_mnist[:config.num_tasks_per_dataset] + dhandlers_fashion_mnist[:config.num_tasks_per_dataset]
+        
+        out_size = 10 if config.cl_mode == 'class' else config.num_classes_per_task
+        in_size = 784
+        dwrappers = []
+        for handler in dhandlers:
+            dwrapper = HypnettorchDatasetWrapper(handler, config.batch_size, 
+                                                 in_size=in_size, out_size=out_size,
+                                                 device=device,
+                                                 double_precision=config.double_precision)
+            dwrappers.append(dwrapper)
+
+        dhandler = dwrappers
 
     elif config.dataset == 'split_cifar':
         num_classes_per_task = 10

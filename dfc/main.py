@@ -68,12 +68,12 @@ def run(network_type='BP'):
     shared = Namespace()
     if config.dataset in ['mnist', 'fashion_mnist', 'cifar10', 'split_mnist',
                           'permuted_mnist', 'split_cifar', 'split_fashion_mnist',
-                          'split_kmnist']:
+                          'split_kmnist', 'split_combined_mnist']:
         shared.classification = True
     elif config.dataset in ['mnist_autoencoder', 'student_teacher']:
         shared.classification = False
     
-    if config.dataset in ['split_mnist', 'permuted_mnist', 'split_cifar', 'split_fashion_mnist', 'split_kmnist']:
+    if config.dataset in ['split_mnist', 'permuted_mnist', 'split_cifar', 'split_fashion_mnist', 'split_kmnist', 'split_combined_mnist']:
         shared.continual_learning = True
         config.no_val_set = True
     else:
