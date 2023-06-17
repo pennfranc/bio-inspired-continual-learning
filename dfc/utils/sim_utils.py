@@ -350,6 +350,10 @@ def update_summary_info_cl(config, shared, network_type):
     summary['task_train_loss_last'] = tv.task_train_loss_last
     summary['task_train_accu_last'] = tv.task_train_accu_last
 
+    if config.dataset == 'split_combined_mnist':
+        summary['test_accu_dataset_1'] = tv.test_accu_dataset_1
+        summary['test_accu_dataset_2'] = tv.test_accu_dataset_2
+
     shared.summary = summary
     save_summary_dict(config, shared)
 
