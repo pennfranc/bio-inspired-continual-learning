@@ -224,6 +224,8 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
         if mode.startswith('bp'):
             group_by_cols_curr = [x for x in groupby_cols if x in results_bp.columns]
         elif mode.startswith('ewc'):
+            if results_ewc is None:
+                continue
             group_by_cols_curr = [x for x in groupby_cols if x in results_ewc.columns]
         elif mode.startswith('si'):
             if results_si is None: 
@@ -245,8 +247,9 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
         ax.errorbar(means[x_axis_value], means[metric],
                      yerr=stds[metric], label=capitalize_label(mode), fmt=line_fmt, markersize=markersize, capsize=capsize,
                             color=('red' if mode==red_mode else None))
-
-        plotted_curves.append((means[f'task_{metric_type}_accu_last'], stds[f'task_{metric_type}_accu_last'], mode))
+        
+        metric = f'task_{metric_type}_accu_last' if metric_type in ['test', 'train'] else metric_type
+        plotted_curves.append((means[metric], stds[metric], mode))
     
     if display_legend:
         ax.legend(prop={'size': fontsize}, loc=legend_loc)
