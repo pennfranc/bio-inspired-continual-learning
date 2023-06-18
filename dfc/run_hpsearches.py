@@ -46,11 +46,11 @@ configs = [
 
     # domain-IL
     'hpconfig_domain-split-mnist-bp',
-    #'hpconfig_domain-mnist-sparse-rec',
+    'hpconfig_domain-mnist-sparse-rec',
     #'hpconfig_domain-mnist-sparse-rec-all-variants',
     #
-    #'hpconfig_domain-split-mnist-ewc',
-    #'hpconfig_domain-split-mnist-si',
+    'hpconfig_domain-split-mnist-ewc',
+    'hpconfig_domain-split-mnist-si',
 #
     #'hpconfig_domain-mnist-sparse-rec-min-accu',
     #'hpconfig_domain-split-mnist-bp-min-accu',
