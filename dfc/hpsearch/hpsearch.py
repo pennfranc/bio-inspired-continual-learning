@@ -1123,6 +1123,9 @@ def run(argv=None, dout_dir='./out/hyperparam_search'):
 
     _read_config(grid_module)
 
+    if grid['dataset'][0] == 'split_combined_mnist':
+        globals()['_SUMMARY_KEYWORDS'] = globals()['_SUMMARY_KEYWORDS'] + ['test_accu_dataset_1', 'test_accu_dataset_2']
+
     print('### Running Hyperparameter Search ...')
 
     if len(conditions) > 0:
