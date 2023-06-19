@@ -22,8 +22,12 @@ parser.add_argument('--force_num_random_seeds', type=int, default=None,
                     help='Number of random seeds, overriding the original config setting.')
 parser.add_argument('--force_hidden_activation', type=str, default=None,
                     help='If provided, overrides the hidden_activation arg in the config.')
+parser.add_argument('--force_size_hidden', type=str, default=None,
+                    help='If provided, overrides the size_hidden arg in the config.')
 parser.add_argument('--force_num_tasks_per_dataset', type=int, default=None,
                     help='Number of tasks for dataset for split_combined_mnist, overriding arg in config.')
+parser.add_argument('--force_num_classes_per_task', type=int, default=None,
+                    help='Number of classes per task, overriding arg in config.')
 args = parser.parse_args()
 
 
@@ -67,9 +71,14 @@ permute_subdir_string = '-permuted' if args.force_permute_labels else ''
 converged_subdir_string = '-converged_only' if args.force_include_only_converged_samples else ''
 hidden_activation_string = f'-{args.force_hidden_activation}' if args.force_hidden_activation else ''
 num_tasks_per_dataset_string = f'-num_tasks_per_dataset={args.force_num_tasks_per_dataset}' if args.force_num_tasks_per_dataset else ''
+size_hidden_string = f'-size_hidden={args.force_size_hidden}' if args.force_size_hidden else ''
+num_classes_per_task_string = f'-num_classes_per_task={args.force_num_classes_per_task}' if args.force_num_classes_per_task else ''
+
 permute_labels_flag = '--force_permute_labels' if args.force_permute_labels else ''
 include_only_converged_samples_flag = '--force_include_only_converged_samples' if args.force_include_only_converged_samples else ''
 random_seeds_flag = f'--force_num_random_seeds={args.force_num_random_seeds}' if args.force_num_random_seeds else ''
+size_hidden_flag = f'--force_size_hidden={args.force_size_hidden}' if args.force_size_hidden else ''
+num_classes_per_task_flag = f'--force_num_classes_per_task={args.force_num_classes_per_task}' if args.force_num_classes_per_task else ''
 hidden_activation_flag = f'--force_hidden_activation={args.force_hidden_activation}' if args.force_hidden_activation else ''
 num_tasks_per_dataset_flag = f'--force_num_tasks_per_dataset={args.force_num_tasks_per_dataset}' if args.force_num_tasks_per_dataset else ''
 
@@ -79,5 +88,5 @@ if args.force_custom_label_permutation:
     permute_labels_flag = f'--force_custom_label_permutation={args.force_custom_label_permutation}'
 
 for config in configs:
-    return_code = subprocess.Popen(f"python3 -m hpsearch.hpsearch --visible_gpus={args.visible_gpus} --force_dataset={args.force_dataset} {permute_labels_flag} {random_seeds_flag} {hidden_activation_flag} {num_tasks_per_dataset_flag} {include_only_converged_samples_flag} --max_num_jobs_per_gpu=1 --allowed_memory=0.3 --grid_module=hpsearch.{config} --force_out_dir --out_dir=out/hpsearches-final/{dataset_subdir_string}{permute_subdir_string}{hidden_activation_string}{converged_subdir_string}{num_tasks_per_dataset_string}/{config} --run_cwd=.", shell=True)
+    return_code = subprocess.Popen(f"python3 -m hpsearch.hpsearch --visible_gpus={args.visible_gpus} --force_dataset={args.force_dataset} {permute_labels_flag} {random_seeds_flag} {hidden_activation_flag} {num_tasks_per_dataset_flag} {num_classes_per_task_flag} {include_only_converged_samples_flag} {size_hidden_flag} --max_num_jobs_per_gpu=1 --allowed_memory=0.3 --grid_module=hpsearch.{config} --force_out_dir --out_dir=out/hpsearches-final/{dataset_subdir_string}{permute_subdir_string}{hidden_activation_string}{converged_subdir_string}{num_tasks_per_dataset_string}{size_hidden_string}{num_classes_per_task_string}/{config} --run_cwd=.", shell=True)
     return_code.wait()

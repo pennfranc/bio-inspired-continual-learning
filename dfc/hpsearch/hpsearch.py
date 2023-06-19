@@ -1044,6 +1044,10 @@ def hpsearch_cli_arguments(parser, show_num_searches=True, show_out_dir=True,
                         help='If provided, overrides the hidden_activation arg in the config.')
     parser.add_argument('--force_num_tasks_per_dataset', type=int, default=None,
                     help='Number of tasks for dataset for split_combined_mnist, overriding arg in config.')
+    parser.add_argument('--force_size_hidden', type=str, default=None,
+                    help='If provided, overrides the size_hidden arg in the config.')
+    parser.add_argument('--force_num_classes_per_task', type=int, default=None,
+                    help='Number of classes per task, overriding arg in config.')
         
 def run(argv=None, dout_dir='./out/hyperparam_search'):
     """Run the hyperparameter search script.
@@ -1104,6 +1108,8 @@ def run(argv=None, dout_dir='./out/hyperparam_search'):
         grid['hidden_activation'] = [args.force_hidden_activation]
     if args.force_num_tasks_per_dataset:
         grid['num_tasks_per_dataset'] = [args.force_num_tasks_per_dataset]
+    if args.force_size_hidden:
+        grid['size_hidden'] = [args.force_size_hidden]
     conditions = grid_module.conditions
 
     grid_config_provided = len(args.grid_config) > 0

@@ -195,7 +195,7 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
                   interesting_cols, modes_to_plot, CL_MODE, MODELS, EVAL_METHOD,
                   line_fmt='-o', markersize=5, capsize=5, red_mode='dfc-sparse-rec',
                   title='', fontsize=14, display_legend=False, legend_loc=None,
-                  yticks=None, xticks=None, metric_type='test'):
+                  yticks=None, xticks=None, metric_type='test', window_size=6):
     
     not_groupby_cols = ['task_test_accu_last', 'random_seed', 'lr_rec', 'task_train_accu_last',
                         'rec_learning_neurons', 'rec_grad_normalization', 'permanent-sparsification',
@@ -241,7 +241,7 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
         grouped = selected_results.groupby(by=group_by_cols_curr)
         means = grouped.mean().reset_index()
 
-        print(mode, 'max window mean', means[metric].rolling(6).mean().max())
+        print(mode, 'max window mean', means[metric].rolling(window_size).mean().max())
 
         stds = grouped.std().reset_index()
         ax.errorbar(means[x_axis_value], means[metric],
@@ -336,6 +336,8 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-bp/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-ewc/search_results.csv', delimiter=';')
         results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-si/search_results.csv', delimiter=';')
+        #results_ewc = None
+        #results_si = None
         #results_l2 = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-l2/search_results.csv', delimiter=';')
 
     elif CL_MODE == 'domain' and MODELS == 'DFC' and EVAL_METHOD == 'LR':
@@ -376,7 +378,7 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         
     return results, results_bp, results_ewc, results_si, results_l2, modes_to_plot
 
-def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, subdir='.', ylim=None, fontsize=14, display_legend=False, legend_loc=None, xticks=None, yticks=None, plot_peak_aligned=False, metric_type='test'):
+def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, subdir='.', ylim=None, fontsize=14, display_legend=False, legend_loc=None, xticks=None, yticks=None, plot_peak_aligned=False, metric_type='test', window_size=6):
     """
     Plots performance results across LRs or minimum accuracies, according to argument configuration.
     """
@@ -393,7 +395,7 @@ def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, subdir='.'
                                        interesting_cols, modes_to_plot, CL_MODE, MODELS, EVAL_METHOD,
                                        title='', fontsize=fontsize, display_legend=display_legend,
                                        legend_loc=legend_loc, xticks=xticks, yticks=yticks, 
-                                       metric_type=metric_type)
+                                       metric_type=metric_type, window_size=window_size)
         if ylim:
             plt.ylim(ylim)
         plt.xticks(fontsize=fontsize)
