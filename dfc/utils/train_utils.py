@@ -112,10 +112,10 @@ def train_incremental(config, logger, device, writer, dloaders, net, optimizers,
 
     # in the case of split_combined_mnist, separately record mean accuracies of the two datasets
     if config.dataset == 'split_combined_mnist':
-        test_accu_dataset_1, _, _, _, _ = \
+        test_accu_dataset_1, _, _, _, _, _ = \
             test_tasks(config, logger, device, writer, shared, dloaders[:config.num_tasks_per_dataset],
                     net, loss_fn,  network_type, data_split='test', train_idx=idx)
-        test_accu_dataset_2, _, _, _, _ = \
+        test_accu_dataset_2, _, _, _, _, _ = \
             test_tasks(config, logger, device, writer, shared, dloaders[config.num_tasks_per_dataset:],
                     net, loss_fn,  network_type, data_split='test', train_idx=idx)
         shared.train_var.test_accu_dataset_1 = test_accu_dataset_1
@@ -501,7 +501,9 @@ def test(config, logger, device, writer, shared, dloader, net, loss_fn,
             test_loss += batch_size * loss_fn(predictions, targets).item()
             if shared.classification:
                 test_accu += batch_size * compute_accuracy(predictions, targets)   
-                test_accu_taskIL += batch_size * compute_accuracy_taskIL(predictions, targets, config.num_classes_per_task, test_idx)   
+                if config.cl_mode == 'class':
+                    test_accu_taskIL += batch_size * compute_accuracy_taskIL(predictions, targets, config.num_classes_per_task,
+                                                                            config.num_tasks_per_dataset, test_idx)   
 
             num_samples += batch_size
             
@@ -601,13 +603,15 @@ def compute_accuracy(predictions, labels):
 
     return correct/total
 
-def compute_accuracy_taskIL(predictions, labels, num_classes_per_task, task_idx):
+def compute_accuracy_taskIL(predictions, labels, num_classes_per_task, num_tasks_per_dataset, task_idx):
 
-    task_idx_start = task_idx * num_classes_per_task
-    task_idx_end = (task_idx + 1) * num_classes_per_task
+    dataset_index = task_idx // num_tasks_per_dataset
+    task_idx_start = (task_idx % num_tasks_per_dataset) * num_classes_per_task + dataset_index * 10
+    task_idx_end = task_idx_start + num_classes_per_task
     
     labels = labels[:, task_idx_start:task_idx_end]
     labels = labels.argmax(dim=1)
+
 
     _, pred_labels = torch.max(predictions.data[:, task_idx_start:task_idx_end], 1)
     total = labels.size(0)
