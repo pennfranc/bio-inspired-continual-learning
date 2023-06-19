@@ -132,6 +132,9 @@ def training_args(parser, network_type, depochs=2, dbatch_size=128,
                              'Currently only used for permuted MNIST.')
     tgroup.add_argument('--num_classes_per_task', type=int, default=2,
                         help='Number of classes per task for continual learning.')
+    tgroup.add_argument('--num_tasks_per_dataset', type=int, default=4,
+                        help='Number of tasks to learn for split mnist and split fashion.'
+                             'mnist each. Only relevant when training on "split_combined_mnist" dataset.')
     tgroup.add_argument('--two_task_mode', action='store_true',
                         help='UNUSED.')
     tgroup.add_argument('--min_acc', type=float, default=0.,
@@ -247,7 +250,7 @@ def dataset_args(parser, ddataset='mnist', dtarget_class_value=1):
                         choices=['mnist', 'fashion_mnist', 'mnist_autoencoder',
                                  'cifar10', 'student_teacher', 'split_mnist',
                                  'permuted_mnist', 'split_cifar', 'split_fashion_mnist',
-                                 'split_kmnist'],
+                                 'split_kmnist', 'split_combined_mnist'],
                         help='Dataset to use for experiments. '
                              'Default: %(default)s.')
     dgroup.add_argument('--no_val_set', action='store_true',
@@ -796,6 +799,10 @@ def post_process_args(config, network_type):
     if config.custom_label_permutation:
             config.custom_label_permutation = [int(x) for x in config.custom_label_permutation.split(',')]
 
+    # adjust num_tasks if dataset == split_combined_mnist
+    if config.dataset == 'split_combined_mnist':
+        config.num_tasks = config.num_tasks_per_dataset * 2
+
     # DFC arguments.
     if network_type == 'DFC' or network_type == 'DFC_single_phase':
 
@@ -954,7 +961,7 @@ def check_invalid_args_general(config, network_type):
         if config.dataset not in ['mnist', 'fashion_mnist', 'split_mnist',
                                   'mnist_autoencoder', 'student_teacher',
                                   'permuted_mnist', 'split_cifar', 'split_fashion_mnist',
-                                  'split_kmnist']:
+                                  'split_kmnist', 'split_combined_mnist']:
             raise NotImplementedError
 
     # Network-specific arguments.

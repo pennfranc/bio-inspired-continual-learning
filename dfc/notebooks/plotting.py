@@ -12,6 +12,8 @@ def preprocess_performance_data(results, results_bp, results_ewc, results_si, re
     interesting_cols = [
         'task_test_accu_last',
         'task_train_accu_last',
+        'test_accu_dataset_1',
+        'test_accu_dataset_2',
         'lr',
         'use_recurrent_weights',
         'lr_rec',
@@ -130,6 +132,8 @@ def plot_sparsity_mix(ax, lrs, set_ylabel=False, title='', cl_mode='domain', fra
     interesting_cols_mix = [
         'task_test_accu_last',
         'task_train_accu_last',
+        'test_accu_dataset_1',
+        'test_accu_dataset_2',
         'lr',
         'use_recurrent_weights',
         'lr_rec',
@@ -157,9 +161,9 @@ def plot_sparsity_mix(ax, lrs, set_ylabel=False, title='', cl_mode='domain', fra
 
     not_groupby_cols_mix = ['task_test_accu_last', 'random_seed', 'lr_rec', 'task_train_accu_last',
                         'rec_learning_neurons', 'rec_grad_normalization', 'permanent-sparsification',
-                        'rec_inference_iterations']
+                        'rec_inference_iterations', 'test_accu_dataset_1', 'test_accu_dataset_2']
 
-    metric_type = "test"
+    metric = f'task_{metric_type}_accu_last' if metric_type in ['test', 'train'] else metric_type
     groupby_cols_mix = [x for x in interesting_cols_mix if x not in not_groupby_cols_mix]
     colors = plt.cm.Greys(np.linspace(0,1,7))
     for idx, lr_exp in enumerate(lrs):
@@ -176,8 +180,8 @@ def plot_sparsity_mix(ax, lrs, set_ylabel=False, title='', cl_mode='domain', fra
                 grouped = selected_results.groupby(by=groupby_cols_mix)
                 means = grouped.mean().reset_index()
                 stds = grouped.std().reset_index()
-                ax.errorbar(means['frac_fb_deciding_sparsity'], means[f'task_{metric_type}_accu_last'],
-                            yerr=stds[f'task_{metric_type}_accu_last'], label=f"1e-{lr_exp}", color=colors[idx+2],
+                ax.errorbar(means['frac_fb_deciding_sparsity'], means[metric],
+                            yerr=stds[metric], label=f"1e-{lr_exp}", color=colors[idx+2],
                             fmt=line_fmt, capsize=capsize, markersize=markersize)
 
     ax.legend(title='Learning rate')
@@ -191,20 +195,20 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
                   interesting_cols, modes_to_plot, CL_MODE, MODELS, EVAL_METHOD,
                   line_fmt='-o', markersize=5, capsize=5, red_mode='dfc-sparse-rec',
                   title='', fontsize=14, display_legend=False, legend_loc=None,
-                  yticks=None, xticks=None):
+                  yticks=None, xticks=None, metric_type='test'):
     
     not_groupby_cols = ['task_test_accu_last', 'random_seed', 'lr_rec', 'task_train_accu_last',
                         'rec_learning_neurons', 'rec_grad_normalization', 'permanent-sparsification',
                         'rec_inference_iterations', 'fw_grad_normalization', 'turn_off_rec_norm_normalization',
                         'hebbian_fw_learning', 'sparsity_level_function', 'frac_rec_deciding_sparsity', 'from_ff_learning',
-                       'block_non_sparsified_neurons', 'network_type', 'reg_coef']
+                       'block_non_sparsified_neurons', 'network_type', 'reg_coef', 'test_accu_dataset_1', 'test_accu_dataset_2']
 
     x_axis_value = 'lr' if EVAL_METHOD == 'LR' else 'stop_early_at_accu'
 
     if EVAL_METHOD == 'LR':
         not_groupby_cols.append('stop_early_at_accu')
 
-    metric_type = "test"
+    metric = f'task_{metric_type}_accu_last' if metric_type in ['test', 'train'] else metric_type
     groupby_cols = [x for x in interesting_cols if x not in not_groupby_cols]
 
     plotted_curves = []
@@ -220,6 +224,8 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
         if mode.startswith('bp'):
             group_by_cols_curr = [x for x in groupby_cols if x in results_bp.columns]
         elif mode.startswith('ewc'):
+            if results_ewc is None:
+                continue
             group_by_cols_curr = [x for x in groupby_cols if x in results_ewc.columns]
         elif mode.startswith('si'):
             if results_si is None: 
@@ -235,14 +241,15 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
         grouped = selected_results.groupby(by=group_by_cols_curr)
         means = grouped.mean().reset_index()
 
-        print(mode, 'max window mean', means[f'task_{metric_type}_accu_last'].rolling(6).mean().max())
+        print(mode, 'max window mean', means[metric].rolling(6).mean().max())
 
         stds = grouped.std().reset_index()
-        ax.errorbar(means[x_axis_value], means[f'task_{metric_type}_accu_last'],
-                     yerr=stds[f'task_{metric_type}_accu_last'], label=capitalize_label(mode), fmt=line_fmt, markersize=markersize, capsize=capsize,
+        ax.errorbar(means[x_axis_value], means[metric],
+                     yerr=stds[metric], label=capitalize_label(mode), fmt=line_fmt, markersize=markersize, capsize=capsize,
                             color=('red' if mode==red_mode else None))
-
-        plotted_curves.append((means[f'task_{metric_type}_accu_last'], stds[f'task_{metric_type}_accu_last'], mode))
+        
+        metric = f'task_{metric_type}_accu_last' if metric_type in ['test', 'train'] else metric_type
+        plotted_curves.append((means[metric], stds[metric], mode))
     
     if display_legend:
         ax.legend(prop={'size': fontsize}, loc=legend_loc)
@@ -369,7 +376,7 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         
     return results, results_bp, results_ewc, results_si, results_l2, modes_to_plot
 
-def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, subdir='.', ylim=None, fontsize=14, display_legend=False, legend_loc=None, xticks=None, yticks=None, plot_peak_aligned=False):
+def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, subdir='.', ylim=None, fontsize=14, display_legend=False, legend_loc=None, xticks=None, yticks=None, plot_peak_aligned=False, metric_type='test'):
     """
     Plots performance results across LRs or minimum accuracies, according to argument configuration.
     """
@@ -385,7 +392,8 @@ def plot_performance(CL_MODE, MODELS, EVAL_METHOD, FIG_DIR, FIG_SIZE, subdir='.'
         plotted_curves = plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
                                        interesting_cols, modes_to_plot, CL_MODE, MODELS, EVAL_METHOD,
                                        title='', fontsize=fontsize, display_legend=display_legend,
-                                       legend_loc=legend_loc, xticks=xticks, yticks=yticks)
+                                       legend_loc=legend_loc, xticks=xticks, yticks=yticks, 
+                                       metric_type=metric_type)
         if ylim:
             plt.ylim(ylim)
         plt.xticks(fontsize=fontsize)

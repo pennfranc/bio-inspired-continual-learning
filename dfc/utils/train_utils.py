@@ -109,6 +109,17 @@ def train_incremental(config, logger, device, writer, dloaders, net, optimizers,
     shared.train_var.task_train_loss_last = shared.train_var.task_train_loss[-1]
     shared.train_var.task_train_accu_taskIL_last = shared.train_var.task_train_accu_taskIL[-1]
     shared.train_var.task_test_accu_taskIL_last = shared.train_var.task_test_accu_taskIL[-1]
+
+    # in the case of split_combined_mnist, separately record mean accuracies of the two datasets
+    if config.dataset == 'split_combined_mnist':
+        test_accu_dataset_1, _, _, _, _ = \
+            test_tasks(config, logger, device, writer, shared, dloaders[:config.num_tasks_per_dataset],
+                    net, loss_fn,  network_type, data_split='test', train_idx=idx)
+        test_accu_dataset_2, _, _, _, _ = \
+            test_tasks(config, logger, device, writer, shared, dloaders[config.num_tasks_per_dataset:],
+                    net, loss_fn,  network_type, data_split='test', train_idx=idx)
+        shared.train_var.test_accu_dataset_1 = test_accu_dataset_1
+        shared.train_var.test_accu_dataset_2 = test_accu_dataset_2
     
     sim_utils.update_summary_info_cl(config, shared, network_type)
     shared.summary['finished'] = 1
