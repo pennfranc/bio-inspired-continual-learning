@@ -137,16 +137,22 @@ def generate_task(config, logger, device):
                                              num_classes_per_task=config.num_classes_per_task, permute_labels=config.permute_labels,
                                              custom_permutation=config.custom_label_permutation)
 
-        dhandlers = dhandlers_mnist[:config.num_tasks_per_dataset] + dhandlers_fashion_mnist[:config.num_tasks_per_dataset]
-        
-        out_size = 10 if config.cl_mode == 'class' else config.num_classes_per_task
+        out_size = 20 if config.cl_mode == 'class' else config.num_classes_per_task
         in_size = 784
         dwrappers = []
-        for handler in dhandlers:
+        for handler in dhandlers_mnist[:config.num_tasks_per_dataset]:
             dwrapper = HypnettorchDatasetWrapper(handler, config.batch_size, 
                                                  in_size=in_size, out_size=out_size,
                                                  device=device,
-                                                 double_precision=config.double_precision)
+                                                 double_precision=config.double_precision,
+                                                 target_padding='post')
+            dwrappers.append(dwrapper)
+        for handler in dhandlers_fashion_mnist[:config.num_tasks_per_dataset]:
+            dwrapper = HypnettorchDatasetWrapper(handler, config.batch_size, 
+                                                 in_size=in_size, out_size=out_size,
+                                                 device=device,
+                                                 double_precision=config.double_precision,
+                                                 target_padding='pre')
             dwrappers.append(dwrapper)
 
         dhandler = dwrappers

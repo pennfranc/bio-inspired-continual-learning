@@ -26,6 +26,7 @@ Implementation of a general Dataset
 Extremely simple implementation of a dataset wrapper. 
 """
 import numpy as np
+import torch
 from  torch import from_numpy
 
 class DatasetWrapper():
@@ -65,7 +66,7 @@ class DatasetWrapper():
 
 class HypnettorchDatasetWrapper(DatasetWrapper):
 
-	def __init__(self, dhandler, batch_size, in_size, out_size, device, double_precision):
+	def __init__(self, dhandler, batch_size, in_size, out_size, device, double_precision, target_padding=None):
 		self.batch_size = batch_size
 		self.device = device
 		self.in_size = in_size
@@ -73,6 +74,7 @@ class HypnettorchDatasetWrapper(DatasetWrapper):
 		self.dhandler = dhandler
 		self.double_precision = double_precision
 		self.name = dhandler.get_identifier()
+		self.target_padding = target_padding
 
 		self.dhandler.shuffle_test_samples = False
 
@@ -80,6 +82,14 @@ class HypnettorchDatasetWrapper(DatasetWrapper):
 		for batch_size, x_numpy, y_numpy in hypnettorch_dhandler:
 			x, y = (self.dhandler.input_to_torch_tensor(x_numpy, device),
 				    self.dhandler.output_to_torch_tensor(y_numpy, device))
+			
+			if self.target_padding is not None:
+				padding_tensor = torch.zeros(y.shape, device=y.device)
+				if self.target_padding == 'pre':
+					y = torch.cat([padding_tensor, y], dim=1)
+				else:
+					y = torch.cat([y, padding_tensor], dim=1)
+				
 			if self.double_precision:
 				x, y = x.double(), y.double()
 			yield x, y

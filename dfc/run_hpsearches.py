@@ -29,11 +29,10 @@ args = parser.parse_args()
 
 configs = [
     # class-IL
-    #'hpconfig_class-mnist-sparse-rec',
-    #'hpconfig_class-mnist-sparse-rec',
+    'hpconfig_class-mnist-sparse-rec',
     #'hpconfig_class-mnist-sparse-rec-all-variants',
-    #'hpconfig_class-split-mnist-bp',
-    #'hpconfig_class-split-mnist-ewc',
+    'hpconfig_class-split-mnist-bp',
+    'hpconfig_class-split-mnist-ewc',
     #'hpconfig_class-split-mnist-si',
 #
     #'hpconfig_class-mnist-sparse-rec-min-accu',
@@ -45,7 +44,7 @@ configs = [
 
 
     # domain-IL
-    'hpconfig_domain-split-mnist-bp',
+    #'hpconfig_domain-split-mnist-bp',
     #'hpconfig_domain-mnist-sparse-rec',
     #'hpconfig_domain-mnist-sparse-rec-all-variants',
     #
