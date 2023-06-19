@@ -49,6 +49,8 @@ def train_incremental(config, logger, device, writer, dloaders, net, optimizers,
     shared.train_var.task_test_accu = []
     shared.train_var.task_train_loss = []
     shared.train_var.task_train_accu = []
+    shared.train_var.task_test_accu_taskIL = []
+    shared.train_var.task_train_accu_taskIL = []
     
     for i in range(config.num_tasks):
         setattr(shared.train_var, f"task_{i}_test_loss", [])
@@ -71,17 +73,17 @@ def train_incremental(config, logger, device, writer, dloaders, net, optimizers,
 
         # when recording activations, the network is tested on all tasks after learning each task
         if config.record_first_batch_activations:
-            test_accu, test_loss, _, test_accus, test_losses = \
+            test_accu, test_loss, test_accu_taskIL, _, test_accus, test_losses = \
                 test_tasks(config, logger, device, writer, shared, dloaders,
                         net, loss_fn,  network_type, data_split='test', train_idx=idx)
-            train_accu, train_loss, _, train_accus, train_losses = \
+            train_accu, train_loss, train_accu_taskIL, _, train_accus, train_losses = \
                 test_tasks(config, logger, device, writer, shared, dloaders,
                         net, loss_fn,  network_type, data_split='train', train_idx=idx)
         else: # test network on all tasks up until current one
-            test_accu, test_loss, _, test_accus, test_losses = \
+            test_accu, test_loss, test_accu_taskIL, _, test_accus, test_losses = \
                 test_tasks(config, logger, device, writer, shared, dloaders[:(idx + 1)],
                         net, loss_fn,  network_type, data_split='test', train_idx=idx)
-            train_accu, train_loss, _, train_accus, train_losses = \
+            train_accu, train_loss, train_accu_taskIL, _, train_accus, train_losses = \
                 test_tasks(config, logger, device, writer, shared, dloaders[:(idx + 1)],
                         net, loss_fn,  network_type, data_split='train', train_idx=idx)
 
@@ -96,12 +98,17 @@ def train_incremental(config, logger, device, writer, dloaders, net, optimizers,
         shared.train_var.task_test_accu.append(test_accu)
         shared.train_var.task_train_loss.append(train_loss)
         shared.train_var.task_train_accu.append(train_accu)
+        shared.train_var.task_train_accu_taskIL.append(train_accu_taskIL)
+        shared.train_var.task_test_accu_taskIL.append(test_accu_taskIL)
+        
 
     # separately record last accuracy/loss
     shared.train_var.task_test_accu_last = shared.train_var.task_test_accu[-1]
     shared.train_var.task_test_loss_last = shared.train_var.task_test_loss[-1]
     shared.train_var.task_train_accu_last = shared.train_var.task_train_accu[-1]
     shared.train_var.task_train_loss_last = shared.train_var.task_train_loss[-1]
+    shared.train_var.task_train_accu_taskIL_last = shared.train_var.task_train_accu_taskIL[-1]
+    shared.train_var.task_test_accu_taskIL_last = shared.train_var.task_test_accu_taskIL[-1]
     
     sim_utils.update_summary_info_cl(config, shared, network_type)
     shared.summary['finished'] = 1
@@ -116,11 +123,12 @@ def test_tasks(config, logger, device, writer, shared, dloaders_subset, net, los
     """
     accu_weighted_sum = 0
     loss_weighted_sum = 0
+    accu_taskIL_weighted_sum = 0
     total_num_samples = 0
     accus = []
     losses = []
     for idx, dloader in enumerate(dloaders_subset):
-        test_loss, test_accu, num_samples = test(config, logger, device, writer,
+        test_loss, test_accu, test_accu_taskIL, num_samples = test(config, logger, device, writer,
                                                  shared, dloader, net, loss_fn,
                                                  network_type, record_results=False,
                                                  data_split=data_split,
@@ -134,12 +142,14 @@ def test_tasks(config, logger, device, writer, shared, dloaders_subset, net, los
 
         accu_weighted_sum += test_accu * num_samples
         loss_weighted_sum += test_loss * num_samples
+        accu_taskIL_weighted_sum += test_accu_taskIL * num_samples
         total_num_samples += num_samples
 
         print(f"{data_split=}, {idx=}, {test_accu=}")
 
     return (accu_weighted_sum / total_num_samples,
             loss_weighted_sum / total_num_samples,
+            accu_taskIL_weighted_sum / total_num_samples,
             total_num_samples, accus, losses)
         
 
@@ -209,13 +219,13 @@ def train(config, logger, device, writer, dloader, net, optimizers, shared,
 
         if not shared.continual_learning:
             ### Test.
-            epoch_test_loss, epoch_test_accu, _ = test(config, logger, device, writer,
+            epoch_test_loss, epoch_test_accu, _, _ = test(config, logger, device, writer,
                                                     shared, dloader, net, loss_fn,
                                                     network_type)
 
             ### Validate.
             if not config.no_val_set:
-                epoch_val_loss, epoch_val_accu, _ = test(config, logger, device,
+                epoch_val_loss, epoch_val_accu, _, _ = test(config, logger, device,
                                                         writer, shared, dloader, net,
                                                         loss_fn, network_type,
                                                         data_split='validation')
@@ -456,77 +466,80 @@ def test(config, logger, device, writer, shared, dloader, net, loss_fn,
     elif data_split == 'train':
         data = dloader.train
     
-    if network_type in ['EWC', 'SI', 'BPExt', 'L2']:
-        test_accu, num_samples = net.validation(data)
+    with torch.no_grad():
         test_loss = 0
-    else:
-        with torch.no_grad():
-            test_loss = 0
-            test_accu = 0 if shared.classification else None
-            num_samples = 0
+        test_accu = 0 if shared.classification else None
+        test_accu_taskIL = 0 if shared.classification else None
+        num_samples = 0
 
-            # Quick fix for generator state to be the same when recording activations
-            # compared to when not recording activations
-            if config.record_first_batch_activations and (test_idx >= (train_idx + 1)) and (data_split=='train'):
-                return 1, 1, 1
+        # Quick fix for generator state to be the same when recording activations
+        # compared to when not recording activations
+        if config.record_first_batch_activations and (test_idx >= (train_idx + 1)) and (data_split=='train'):
+            return 1, 1, 1
 
-            for i, (inputs, targets) in enumerate(data):
-                batch_size = inputs.shape[0]
+        for i, (inputs, targets) in enumerate(data):
+            batch_size = inputs.shape[0]
+
+            if network_type in ['EWC', 'SI', 'BPExt', 'L2']:
+                predictions = net.predict(data)
+            else:
                 predictions = net.forward(inputs, sparsity=True)
+            
 
-                ### Compute loss and accuracy.
-                test_loss += batch_size * loss_fn(predictions, targets).item()
-                if shared.classification:
-                    test_accu += batch_size * compute_accuracy(predictions, targets)      
+            ### Compute loss and accuracy.
+            test_loss += batch_size * loss_fn(predictions, targets).item()
+            if shared.classification:
+                test_accu += batch_size * compute_accuracy(predictions, targets)   
+                test_accu_taskIL += batch_size * compute_accuracy_taskIL(predictions, targets, config.num_classes_per_task, test_idx)   
 
-                num_samples += batch_size
+            num_samples += batch_size
+            
+            # saving activations/targets, if required
+            if config.record_first_batch_activations and (data_split == 'test') and (i == 0):
+
+                # saving feedforward activations, if required
+                dir_name = config.out_dir + "/activations-feedforward"
+                if not os.path.exists(dir_name):
+                    os.mkdir(dir_name)
                 
-                # saving activations/targets, if required
-                if config.record_first_batch_activations and (data_split == 'test') and (i == 0):
+                for layer in range(len(net.layers)):
+                    with open(dir_name + f"/{train_idx=}{test_idx=}{layer=}.npy", 'wb') as f:
+                        np.save(f, net.layers[layer].activations.detach().cpu().numpy())
+                
+                with open(dir_name + f"/targets-{train_idx=}{test_idx=}.npy", 'wb') as f:
+                        np.save(f, targets.detach().cpu().numpy())
 
-                    # saving feedforward activations, if required
-                    dir_name = config.out_dir + "/activations-feedforward"
+                # saving controller-induced target activations, if DFC
+                if network_type == 'DFC':
+                    dir_name = config.out_dir + "/activations-controller"
                     if not os.path.exists(dir_name):
                         os.mkdir(dir_name)
+
+                    r, u, (v_fb, v_ff, v), sample_error = net.controller(targets, net.alpha_di, net.dt_di,
+                                    net.tmax_di,
+                                    k_p=net.k_p,
+                                    noisy_dynamics=net.noisy_dynamics,
+                                    inst_transmission=net.inst_transmission,
+                                    time_constant_ratio=net.time_constant_ratio,
+                                    apical_time_constant=net.apical_time_constant,
+                                    proactive_controller=net.proactive_controller,
+                                    sigma=net.sigma,
+                                    sigma_output=net.sigma_output)
                     
                     for layer in range(len(net.layers)):
                         with open(dir_name + f"/{train_idx=}{test_idx=}{layer=}.npy", 'wb') as f:
-                            np.save(f, net.layers[layer].activations.detach().cpu().numpy())
+                            np.save(f, r[layer][-1, :, :].detach().cpu().numpy())
                     
-                    with open(dir_name + f"/targets-{train_idx=}{test_idx=}.npy", 'wb') as f:
-                            np.save(f, targets.detach().cpu().numpy())
+                    dir_name = config.out_dir + "/activations-recurrent"
+                    if not os.path.exists(dir_name):
+                        os.mkdir(dir_name)
 
-                    # saving controller-induced target activations, if DFC
-                    if network_type == 'DFC':
-                        dir_name = config.out_dir + "/activations-controller"
-                        if not os.path.exists(dir_name):
-                            os.mkdir(dir_name)
+                    for layer in range(len(net.layers)):
+                        with open(dir_name + f"/{train_idx=}{test_idx=}{layer=}.npy", 'wb') as f:
+                            np.save(f, torch.tanh(v_ff[layer][-1, :, :]).detach().cpu().numpy())
 
-                        r, u, (v_fb, v_ff, v), sample_error = net.controller(targets, net.alpha_di, net.dt_di,
-                                        net.tmax_di,
-                                        k_p=net.k_p,
-                                        noisy_dynamics=net.noisy_dynamics,
-                                        inst_transmission=net.inst_transmission,
-                                        time_constant_ratio=net.time_constant_ratio,
-                                        apical_time_constant=net.apical_time_constant,
-                                        proactive_controller=net.proactive_controller,
-                                        sigma=net.sigma,
-                                        sigma_output=net.sigma_output)
-                        
-                        for layer in range(len(net.layers)):
-                            with open(dir_name + f"/{train_idx=}{test_idx=}{layer=}.npy", 'wb') as f:
-                                np.save(f, r[layer][-1, :, :].detach().cpu().numpy())
-                        
-                        dir_name = config.out_dir + "/activations-recurrent"
-                        if not os.path.exists(dir_name):
-                            os.mkdir(dir_name)
-
-                        for layer in range(len(net.layers)):
-                            with open(dir_name + f"/{train_idx=}{test_idx=}{layer=}.npy", 'wb') as f:
-                                np.save(f, torch.tanh(v_ff[layer][-1, :, :]).detach().cpu().numpy())
-
-                if config.test and i == 1:
-                    break
+            if config.test and i == 1:
+                break
 
     # For auto-encoding runs, plot some reconstructions.
     if config.dataset == 'mnist_autoencoder' and not config.no_plots:
@@ -538,6 +551,7 @@ def test(config, logger, device, writer, shared, dloader, net, loss_fn,
     test_loss /= num_samples
     if shared.classification:
         test_accu /= num_samples
+        test_accu_taskIL /= num_samples
 
     # Save results in train_var.
     if record_results and data_split == 'test':
@@ -549,7 +563,7 @@ def test(config, logger, device, writer, shared, dloader, net, loss_fn,
         if shared.classification:
             shared.train_var.epochs_val_accu.append(test_accu)
 
-    return test_loss, test_accu, num_samples
+    return test_loss, test_accu, test_accu_taskIL, num_samples
 
 
 def compute_accuracy(predictions, labels):
@@ -571,6 +585,20 @@ def compute_accuracy(predictions, labels):
         labels = labels.argmax(dim=1)
 
     _, pred_labels = torch.max(predictions.data, 1)
+    total = labels.size(0)
+    correct = (pred_labels == labels).sum().item()
+
+    return correct/total
+
+def compute_accuracy_taskIL(predictions, labels, num_classes_per_task, task_idx):
+
+    task_idx_start = task_idx * num_classes_per_task
+    task_idx_end = (task_idx + 1) * num_classes_per_task
+    
+    labels = labels[:, task_idx_start:task_idx_end]
+    labels = labels.argmax(dim=1)
+
+    _, pred_labels = torch.max(predictions.data[:, task_idx_start:task_idx_end], 1)
     total = labels.size(0)
     correct = (pred_labels == labels).sum().item()
 

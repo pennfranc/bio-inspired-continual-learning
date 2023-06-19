@@ -344,11 +344,15 @@ def update_summary_info_cl(config, shared, network_type):
     summary['task_test_accu'] = tv.task_test_accu
     summary['task_train_loss'] = tv.task_train_loss
     summary['task_train_accu'] = tv.task_train_accu
+    summary['task_train_accu_taskIL'] = tv.task_train_accu_taskIL
+    summary['task_test_accu_taskIL'] = tv.task_test_accu_taskIL
 
     summary['task_test_loss_last'] = tv.task_test_loss_last
     summary['task_test_accu_last'] = tv.task_test_accu_last
     summary['task_train_loss_last'] = tv.task_train_loss_last
     summary['task_train_accu_last'] = tv.task_train_accu_last
+    summary['task_test_accu_taskIL_last'] = tv.task_test_accu_taskIL_last
+    summary['task_train_accu_taskIL_last'] = tv.task_train_accu_taskIL_last
 
     shared.summary = summary
     save_summary_dict(config, shared)

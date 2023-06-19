@@ -466,7 +466,7 @@ def run_hyperplane_analysis(
     """
     sparsity = "0.4,0.8,0.5" if cl_mode == 'domain' else "0.2,0.8,0.9"
     size = "20,20" if cl_mode == 'domain' else "200,200"
-    chosen_lrs = [1.0, 1.5, 2, 2.5, 3, 3.5, 4, 4.5]
+    chosen_lrs = [2, 2.5, 3, 3.5, 4, 4.5]
     lrs = [10 ** (-neg_exp) for neg_exp in chosen_lrs]
 
 

@@ -115,7 +115,9 @@ _SUMMARY_KEYWORDS = [
     'task_test_loss_last',
     'task_test_accu_last',
     'task_train_loss_last',
-    'task_train_accu_last'
+    'task_train_accu_last',
+    'task_test_accu_taskIL_last',
+    'task_train_accu_taskIL_last'
 ]
 
 # The name of the command-line argument that determines the output folder
