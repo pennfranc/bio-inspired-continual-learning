@@ -477,82 +477,82 @@ def test(config, logger, device, writer, shared, dloader, net, loss_fn,
     elif data_split == 'train':
         data = dloader.train
     
-    with torch.no_grad():
+    if network_type in ['EWC', 'SI', 'BPExt', 'L2']:
+        test_accu, num_samples = net.validation(data)
+        test_accu_taskIL = 0
         test_loss = 0
-        test_accu = 0 if shared.classification else None
-        test_accu_taskIL = 0 if shared.classification else None
-        num_samples = 0
+    else:
+        with torch.no_grad():
+            test_loss = 0
+            test_accu = 0 if shared.classification else None
+            test_accu_taskIL = 0 if shared.classification else None
+            num_samples = 0
 
-        # Quick fix for generator state to be the same when recording activations
-        # compared to when not recording activations
-        if config.record_first_batch_activations and (test_idx >= (train_idx + 1)) and (data_split=='train'):
-            return 1, 1, 1
+            # Quick fix for generator state to be the same when recording activations
+            # compared to when not recording activations
+            if config.record_first_batch_activations and (test_idx >= (train_idx + 1)) and (data_split=='train'):
+                return 1, 1, 1
 
-        for i, (inputs, targets) in enumerate(data):
-            batch_size = inputs.shape[0]
-
-            if network_type in ['EWC', 'SI', 'BPExt', 'L2']:
-                predictions = net.predict(data)
-            else:
+            for i, (inputs, targets) in enumerate(data):
+                batch_size = inputs.shape[0]
                 predictions = net.forward(inputs, sparsity=True)
-            
 
-            ### Compute loss and accuracy.
-            test_loss += batch_size * loss_fn(predictions, targets).item()
-            if shared.classification:
-                test_accu += batch_size * compute_accuracy(predictions, targets)   
+                ### Compute loss and accuracy.
+                test_loss += batch_size * loss_fn(predictions, targets).item()
+                if shared.classification:
+                    test_accu += batch_size * compute_accuracy(predictions, targets)   
                 if config.cl_mode == 'class':
                     test_accu_taskIL += batch_size * compute_accuracy_taskIL(predictions, targets, config.num_classes_per_task,
                                                                             config.num_tasks_per_dataset, test_idx)   
 
-            num_samples += batch_size
-            
-            # saving activations/targets, if required
-            if config.record_first_batch_activations and (data_split == 'test') and (i == 0):
-
-                # saving feedforward activations, if required
-                dir_name = config.out_dir + "/activations-feedforward"
-                if not os.path.exists(dir_name):
-                    os.mkdir(dir_name)
+                num_samples += batch_size
                 
-                for layer in range(len(net.layers)):
-                    with open(dir_name + f"/{train_idx=}{test_idx=}{layer=}.npy", 'wb') as f:
-                        np.save(f, net.layers[layer].activations.detach().cpu().numpy())
-                
-                with open(dir_name + f"/targets-{train_idx=}{test_idx=}.npy", 'wb') as f:
-                        np.save(f, targets.detach().cpu().numpy())
+                # saving activations/targets, if required
+                if config.record_first_batch_activations and (data_split == 'test') and (i == 0):
 
-                # saving controller-induced target activations, if DFC
-                if network_type == 'DFC':
-                    dir_name = config.out_dir + "/activations-controller"
+                    # saving feedforward activations, if required
+                    dir_name = config.out_dir + "/activations-feedforward"
                     if not os.path.exists(dir_name):
                         os.mkdir(dir_name)
-
-                    r, u, (v_fb, v_ff, v), sample_error = net.controller(targets, net.alpha_di, net.dt_di,
-                                    net.tmax_di,
-                                    k_p=net.k_p,
-                                    noisy_dynamics=net.noisy_dynamics,
-                                    inst_transmission=net.inst_transmission,
-                                    time_constant_ratio=net.time_constant_ratio,
-                                    apical_time_constant=net.apical_time_constant,
-                                    proactive_controller=net.proactive_controller,
-                                    sigma=net.sigma,
-                                    sigma_output=net.sigma_output)
                     
                     for layer in range(len(net.layers)):
                         with open(dir_name + f"/{train_idx=}{test_idx=}{layer=}.npy", 'wb') as f:
-                            np.save(f, r[layer][-1, :, :].detach().cpu().numpy())
+                            np.save(f, net.layers[layer].activations.detach().cpu().numpy())
                     
-                    dir_name = config.out_dir + "/activations-recurrent"
-                    if not os.path.exists(dir_name):
-                        os.mkdir(dir_name)
+                    with open(dir_name + f"/targets-{train_idx=}{test_idx=}.npy", 'wb') as f:
+                            np.save(f, targets.detach().cpu().numpy())
 
-                    for layer in range(len(net.layers)):
-                        with open(dir_name + f"/{train_idx=}{test_idx=}{layer=}.npy", 'wb') as f:
-                            np.save(f, torch.tanh(v_ff[layer][-1, :, :]).detach().cpu().numpy())
+                    # saving controller-induced target activations, if DFC
+                    if network_type == 'DFC':
+                        dir_name = config.out_dir + "/activations-controller"
+                        if not os.path.exists(dir_name):
+                            os.mkdir(dir_name)
 
-            if config.test and i == 1:
-                break
+                        r, u, (v_fb, v_ff, v), sample_error = net.controller(targets, net.alpha_di, net.dt_di,
+                                        net.tmax_di,
+                                        k_p=net.k_p,
+                                        noisy_dynamics=net.noisy_dynamics,
+                                        inst_transmission=net.inst_transmission,
+                                        time_constant_ratio=net.time_constant_ratio,
+                                        apical_time_constant=net.apical_time_constant,
+                                        proactive_controller=net.proactive_controller,
+                                        sigma=net.sigma,
+                                        sigma_output=net.sigma_output)
+                        
+                        for layer in range(len(net.layers)):
+                            with open(dir_name + f"/{train_idx=}{test_idx=}{layer=}.npy", 'wb') as f:
+                                np.save(f, r[layer][-1, :, :].detach().cpu().numpy())
+                        
+                        dir_name = config.out_dir + "/activations-recurrent"
+                        if not os.path.exists(dir_name):
+                            os.mkdir(dir_name)
+
+                        for layer in range(len(net.layers)):
+                            with open(dir_name + f"/{train_idx=}{test_idx=}{layer=}.npy", 'wb') as f:
+                                np.save(f, torch.tanh(v_ff[layer][-1, :, :]).detach().cpu().numpy())
+
+                if config.test and i == 1:
+                    break
 
     # For auto-encoding runs, plot some reconstructions.
     if config.dataset == 'mnist_autoencoder' and not config.no_plots:
