@@ -40,6 +40,9 @@ class MLP(nn.Module):
 def MLP20(activation_override=None):
     return MLP(hidden_dim=20, activation_override=activation_override)
 
+def MLP50(activation_override=None):
+    return MLP(hidden_dim=50, activation_override=activation_override)
+
 def MLP100(activation_override=None):
     return MLP(hidden_dim=100, activation_override=activation_override)
 
