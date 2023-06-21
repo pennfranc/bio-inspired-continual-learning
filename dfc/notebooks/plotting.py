@@ -35,7 +35,8 @@ def preprocess_performance_data(results, results_bp, results_ewc, results_si, re
         'from_ff_learning',
         'frac_rec_deciding_sparsity',
         'network_type',
-        'reg_coef'
+        'reg_coef',
+        'task_test_accu_taskIL_last'
 
     ]
     interesting_cols_normal = results.columns[results.columns.isin(interesting_cols)]
@@ -150,7 +151,8 @@ def plot_sparsity_mix(ax, lrs, set_ylabel=False, title='', cl_mode='domain', fra
         'block_non_sparsified_neurons',
         'rec_inference_iterations',
         'frac_fb_deciding_sparsity',
-        'frac_rec_deciding_sparsity'
+        'frac_rec_deciding_sparsity',
+        'task_test_accu_taskIL_last'
         
     ]
     interesting_cols_mix = results_mix.columns[results_mix.columns.isin(interesting_cols_mix)]
@@ -161,7 +163,7 @@ def plot_sparsity_mix(ax, lrs, set_ylabel=False, title='', cl_mode='domain', fra
 
     not_groupby_cols_mix = ['task_test_accu_last', 'random_seed', 'lr_rec', 'task_train_accu_last',
                         'rec_learning_neurons', 'rec_grad_normalization', 'permanent-sparsification',
-                        'rec_inference_iterations', 'test_accu_dataset_1', 'test_accu_dataset_2']
+                        'rec_inference_iterations', 'test_accu_dataset_1', 'test_accu_dataset_2', 'task_test_accu_taskIL_last']
 
     metric = f'task_{metric_type}_accu_last' if metric_type in ['test', 'train'] else metric_type
     groupby_cols_mix = [x for x in interesting_cols_mix if x not in not_groupby_cols_mix]
@@ -201,7 +203,8 @@ def plot_lr_sweep(ax, results, results_bp, results_ewc, results_si, results_l2,
                         'rec_learning_neurons', 'rec_grad_normalization', 'permanent-sparsification',
                         'rec_inference_iterations', 'fw_grad_normalization', 'turn_off_rec_norm_normalization',
                         'hebbian_fw_learning', 'sparsity_level_function', 'frac_rec_deciding_sparsity', 'from_ff_learning',
-                       'block_non_sparsified_neurons', 'network_type', 'reg_coef', 'test_accu_dataset_1', 'test_accu_dataset_2']
+                        'block_non_sparsified_neurons', 'network_type', 'reg_coef', 'test_accu_dataset_1', 'test_accu_dataset_2',
+                        'task_test_accu_taskIL_last']
 
     x_axis_value = 'lr' if EVAL_METHOD == 'LR' else 'stop_early_at_accu'
 
@@ -335,9 +338,9 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-mnist-sparse-rec/search_results.csv', delimiter=';')
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-bp/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-ewc/search_results.csv', delimiter=';')
-        results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-si/search_results.csv', delimiter=';')
+        #results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-si/search_results.csv', delimiter=';')
         #results_ewc = None
-        #results_si = None
+        results_si = None
         #results_l2 = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_domain-split-mnist-l2/search_results.csv', delimiter=';')
 
     elif CL_MODE == 'domain' and MODELS == 'DFC' and EVAL_METHOD == 'LR':
@@ -361,7 +364,8 @@ def load_performance_data(CL_MODE, MODELS, EVAL_METHOD, subdir='.'):
         results_bp = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-bp/search_results.csv', delimiter=';')
         results_ewc = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-ewc/search_results.csv', delimiter=';')
         results_si = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-split-mnist-si/search_results.csv', delimiter=';')
-
+        #results_ewc = None
+        #results_si = None
     elif CL_MODE == 'class' and MODELS == 'DFC' and EVAL_METHOD == 'LR':
         modes_to_plot = ['dfc-standard', 'dfc-rec', 'dfc-sparse', 'dfc-sparse-rec']
         results = pd.read_csv(os.getcwd() + f'/../out/hpsearches-final/{subdir}/hpconfig_class-mnist-sparse-rec-all-variants/search_results.csv', delimiter=';')
